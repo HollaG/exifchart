@@ -1,0 +1,4 @@
+{
+    "SUPPORTED_FILETYPES": ["jpg", "png"],
+    "EXIF_TAGS": ["FNumber", "FocalLength", "ISO", "ExposureCompensation", "ExposureTime", "ExposureProgram", "LensModel", "Model", "WhiteBalance"]
+}
