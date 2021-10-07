@@ -6,7 +6,7 @@ function App() {
   return (
     <>
         <Navbar/>
-        <main className="px-2 w-screen lg:w-9/12 mx-auto mt-8">
+        <main className="px-2 w-screen md:w-9/12 mx-auto mt-8">
             <Header/>
             <Body/>
         </main>

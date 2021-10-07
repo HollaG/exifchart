@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* This style is to fix inconsistent indentation in the React Library 'react-checkbox-tree'. 
+https://www.npmjs.com/package/react-checkbox-tree
+*/
+span.rct-collapse { 
+	width: 17.5px !important
+}

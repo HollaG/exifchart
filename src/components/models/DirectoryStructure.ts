@@ -1,9 +1,11 @@
 export default interface DirectoryStructure { 
-    rootFolder: {
-        [key:string]: Object
-    }
+    rootFolder: resultInterface[],
+    folderList: string[]
 
 }
+export interface resultInterface {
+    value: string, label: string, children?: resultInterface[] 
+ }
 
 
 // {

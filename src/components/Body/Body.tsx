@@ -1,15 +1,9 @@
-
-import DirectoryPicker from "./DirectoryPicker";
-import DirectoryViewer from "./DirectoryViewer";
-
+import Directory from "./Directory/Directory";
 
 const Body = () => {
-    
-    
     return (
         <>
-            <DirectoryPicker />
-            <DirectoryViewer />
+            <Directory />
         </>
     );
 };

@@ -1,38 +1,57 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import DirectoryDetails from "../components/models/DirectoryDetails";
-import DirectoryStructure from "../components/models/DirectoryStructure";
+import { WritableDraft } from "@reduxjs/toolkit/node_modules/immer/dist/internal";
+
+import DirectoryStructure, {
+    resultInterface,
+} from "../components/models/DirectoryStructure";
 
 const initialState: DirectoryStructure = {
-    rootFolder: {},
+    rootFolder: [],
+    folderList: [],
 };
-
+const uid = function () {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
 const directoriesSlice = createSlice({
     name: "directories",
     initialState,
     reducers: {
-        addDirectory: (state, action: PayloadAction<String>) => {
-            // action.payload --> /Photo Outings/01_04_2021/Edited (for example)
+        addDirectory: (state, action: PayloadAction<string>) => {
+            state.folderList.push(action.payload);
+        },
+        constructTree(state) {
+            console.log("Constructing directory tree");
 
-            const folderTree = action.payload.split("/");
-            console.log(folderTree);
+            const directories = state.folderList;
 
-            for (let i = 0; i < folderTree.length; i++) {
-                let folder = folderTree[i];
+            // Taken from: https://stackoverflow.com/questions/57344694/create-a-tree-from-a-list-of-strings-containing-paths-of-files-javascript
+            // Thanks!
+            let result: resultInterface[] = [];
+            let level = { result };
 
-                // Check if the current folder exists in the State.
-                let folderPath = folderTree.slice(0, i+1);
-                console.log({ folderPath, folder });
-                for (let nestedFolder of folderPath) {
-                    console.log(nestedFolder)
-                    if (!Object.keys(state.rootFolder).includes(nestedFolder)) {
-                        // Create the folder structure in the tree
-                        state.rootFolder[nestedFolder] = 1;
-                        
+            directories?.forEach((path) => {
+                path.split("/").reduce((r: any, name) => {
+                    if (!r[name]) {
+                        r[name] = { result: [] };
+
+                        let id = uid();
+
+                        r.result.push({
+                            value: id,
+                            label: name,
+                            children: r[name].result,
+                        });
                     }
-                }
-            }
-
-            
+                    return r[name];
+                }, level);
+            });
+            console.log("Completed directory tree construction");
+            state.rootFolder.push({
+              value: state.rootFolder.length.toString(),
+              label: `Import ${state.rootFolder.length + 1}`,
+              children: result
+            })
+            // state.rootFolder = result
         },
     },
 });
