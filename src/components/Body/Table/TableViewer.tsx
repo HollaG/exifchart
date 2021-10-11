@@ -1,7 +1,13 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import RootState from "../../models/RootState";
-import { Column, TableOptions, useSortBy, useTable } from "react-table";
+import {
+    Column,
+    TableOptions,
+    usePagination,
+    useSortBy,
+    useTable,
+} from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DirectoryButton from "../../../ui/DirectoryButton";
@@ -9,6 +15,7 @@ import TableDataObject from "../../models/TableDataObject";
 import { columns } from "../../../config/table_config";
 
 import { createSelector } from "reselect";
+import useWindowDimensions from "../../../hooks/use-window-dimensions";
 const selectTableData = createSelector(
     (state: RootState) => state.files.tableData,
     (tableData) => tableData
@@ -17,6 +24,12 @@ const selectTableData = createSelector(
 const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
     // const filesObject = useSelector((state: RootState) => state.files.files);
     console.log("tableviwer rerendering");
+
+    const {height, width} = useWindowDimensions()
+
+    console.log(height)
+    const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1
+
     // interface DataObject {
     //     id: number;
     //     filePath: string;
@@ -119,11 +132,34 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
 
     // See https://github.com/tannerlinsley/react-table/discussions/2848 for disableSortRemove
     const tableInstance = useTable<TableDataObject>(
-        { columns, data, disableSortRemove: true },
-        useSortBy
+        { columns, data, disableSortRemove: true, initialState: {pageSize: numberOfRowsShowing} },
+        useSortBy,
+        usePagination
     );
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-        tableInstance;
+
+    
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        rows,
+        prepareRow,
+        page, // Instead of using 'rows', we'll use page,
+        // which has only the rows for the active page
+
+        // The rest of these things are super handy, too ;)
+        canPreviousPage,
+        canNextPage,
+        pageOptions,
+        pageCount,
+        gotoPage,
+        nextPage,
+        previousPage,
+        setPageSize,
+        state: { pageIndex, pageSize },
+    } = tableInstance;
+
+    
 
     return (
         <div style={{ maxHeight: "85vh" }}>
@@ -162,7 +198,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                     ))}
                 </thead>
                 <tbody {...getTableBodyProps()}>
-                    {rows.map((row, index) => {
+                    {page.map((row, index) => {
                         prepareRow(row);
                         return (
                             <tr {...row.getRowProps()}>
@@ -179,7 +215,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                                             >
                                                 {
                                                     <DirectoryButton
-                                                        onClick={() => {}}
+                                                        onClick={() => {console.log(cell)}}
                                                     >
                                                         {" "}
                                                         Load{" "}
@@ -207,6 +243,58 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                     })}
                 </tbody>
             </table>
+            <div className="pagination">
+                <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+                    {"<<"}
+                </button>{" "}
+                <button
+                    onClick={() => previousPage()}
+                    disabled={!canPreviousPage}
+                >
+                    {"<"}
+                </button>{" "}
+                <button onClick={() => nextPage()} disabled={!canNextPage}>
+                    {">"}
+                </button>{" "}
+                <button
+                    onClick={() => gotoPage(pageCount - 1)}
+                    disabled={!canNextPage}
+                >
+                    {">>"}
+                </button>{" "}
+                <span>
+                    Page{" "}
+                    <strong>
+                        {pageIndex + 1} of {pageOptions.length}
+                    </strong>{" "}
+                </span>
+                <span>
+                    | Go to page:{" "}
+                    <input
+                        type="number"
+                        defaultValue={pageIndex + 1}
+                        onChange={(e) => {
+                            const page = e.target.value
+                                ? Number(e.target.value) - 1
+                                : 0;
+                            gotoPage(page);
+                        }}
+                        style={{ width: "100px" }}
+                    />
+                </span>{" "}
+                {/* <select
+                    value={pageSize}
+                    onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                        <option key={pageSize} value={pageSize}>
+                            Show {pageSize}
+                        </option>
+                    ))}
+                </select> */}
+            </div>
         </div>
     );
     return (
