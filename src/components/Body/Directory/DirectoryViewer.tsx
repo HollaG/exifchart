@@ -24,7 +24,7 @@ import "react-checkbox-tree/lib/react-checkbox-tree.css";
 import { findDOMNode } from "react-dom";
 import { useSelector } from "react-redux";
 
-import { resultInterface } from "../../models/DirectoryStructure";
+import { resultInterface } from "../../models/Directory";
 
 import RootState from "../../models/RootState";
 

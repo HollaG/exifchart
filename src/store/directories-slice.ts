@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import DirectoryStructure, {
     resultInterface,
-} from "../components/models/DirectoryStructure";
+} from "../components/models/Directory";
 
 const initialState: DirectoryStructure = {
     rootFolder: [],
@@ -21,12 +21,17 @@ const directoriesSlice = createSlice({
         addDirectory: (state, action: PayloadAction<string>) => {
             state.folderList.push(action.payload);
         },
+        setDirectories: (state, action: PayloadAction<string[]>) => {
+            console.log("DirectoriesSlice reducer: setDirectories");
 
+            state.folderList.push(...action.payload)
+        },
         setBeginConstructing(state) {
             state.constructing = true;
         },
         constructTree(state) {
-            console.log("Constructing directory tree");
+            console.log("DirectoriesSlice reducer: constructTree");
+
 
             const directories = state.folderList;
 
@@ -49,7 +54,7 @@ const directoriesSlice = createSlice({
             if (state.rootFolder.length) {
                 state.rootFolder.forEach((tree) => {
                     // Get the total number of children of this tree
-                    // However, note that the root tree itself should not be added to the iterator                
+                    // However, note that the root tree itself should not be added to the iterator              
 
                     
                     getChildren(tree.children);

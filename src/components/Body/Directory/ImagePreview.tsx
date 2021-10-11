@@ -8,7 +8,8 @@ const ImagePreview: React.FC<{ src: string, path: string }> = ({ src, path }) =>
         >
             {src ? (
                 <>
-                    <p className="absolute bg-gray-100 border-gray-500 border-2 rounded py-1 px-2 bottom-2 right-2 text-xs"> {path} </p>
+                    <p className="absolute bg-gray-100 border-gray-500 border-2 rounded py-1 px-2 bottom-2 right-2 text-xs text-right"
+                    style={{maxWidth:"75%"}}> {path} </p>
                     <img
                         className="w-full h-full object-cover"
                         src={src}

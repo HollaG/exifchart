@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import RootState from "../../models/RootState";
 import { Column, TableOptions, useSortBy, useTable } from "react-table";
@@ -6,9 +6,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DirectoryButton from "../../../ui/DirectoryButton";
 import TableDataObject from "../../models/TableDataObject";
-const TableViewer = () => {
-    const filesObject = useSelector((state: RootState) => state.files.files);
+import { columns } from "../../../config/table_config";
 
+import { createSelector } from "reselect";
+const selectTableData = createSelector(
+    (state: RootState) => state.files.tableData,
+    (tableData) => tableData
+);
+
+const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
+    // const filesObject = useSelector((state: RootState) => state.files.files);
+    console.log("tableviwer rerendering");
     // interface DataObject {
     //     id: number;
     //     filePath: string;
@@ -50,61 +58,64 @@ const TableViewer = () => {
     //     return fileArr;
     // }, [filesObject]);
 
-    const data: TableDataObject[] = []
-    const columns: Column<TableDataObject>[] = useMemo(
-        () => [
-            {
-                Header: "#",
-                accessor: "id" as keyof TableDataObject,
-            },
-            {
-                Header: "File Path",
-                accessor: "filePath" as keyof TableDataObject,
-            },
-            {
-                Header: "Preview",
-                accessor: "image" as keyof TableDataObject,
-            },
-            {
-                Header: "Camera Model",
-                accessor: "cameraModel" as keyof TableDataObject,
-            },
-            {
-                Header: "Lens Model",
-                accessor: "lensModel" as keyof TableDataObject,
-            },
-            {
-                Header: "Focal Length (35mm equiv)",
-                accessor: "focalLength" as keyof TableDataObject,
-            },
-            {
-                Header: "Shutter Speed",
-                accessor: "shutterSpeed" as keyof TableDataObject,
-            },
-            {
-                Header: "Aperture",
-                accessor: "aperture" as keyof TableDataObject,
-            },
-
-            {
-                Header: "ISO",
-                accessor: "iso" as keyof TableDataObject,
-            },
-            {
-                Header: "Exposure Mode",
-                accessor: "exposureMode" as keyof TableDataObject,
-            },
-            {
-                Header: "Exposure Compensation" as keyof TableDataObject,
-                accessor: "exposureComp",
-            },
-            {
-                Header: "White Balance",
-                accessor: "whiteBalance" as keyof TableDataObject,
-            },
-        ],
-        []
+    const rawData: TableDataObject[] = useSelector(
+        (state: RootState) => state.files.tableData
     );
+    const data = useMemo(() => rawData, []);
+    // const columns: Column<TableDataObject>[] = useMemo(
+    //     () => [
+    //         {
+    //             Header: "#",
+    //             accessor: "id" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "File Path",
+    //             accessor: "path" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Preview",
+    //             accessor: "image" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Camera Model",
+    //             accessor: "cameraModel" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Lens Model",
+    //             accessor: "lensModel" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Focal Length (35mm equiv)",
+    //             accessor: "focalLength" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Shutter Speed",
+    //             accessor: "shutterSpeed" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Aperture",
+    //             accessor: "aperture" as keyof TableDataObject,
+    //         },
+
+    //         {
+    //             Header: "ISO",
+    //             accessor: "iso" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Exposure Mode",
+    //             accessor: "exposureMode" as keyof TableDataObject,
+    //         },
+    //         {
+    //             Header: "Exposure Compensation" as keyof TableDataObject,
+    //             accessor: "exposureCompensation",
+    //         },
+    //         {
+    //             Header: "White Balance",
+    //             accessor: "whiteBalance" as keyof TableDataObject,
+    //         },
+    //     ],
+    //     []
+    // );
 
     // See https://github.com/tannerlinsley/react-table/discussions/2848 for disableSortRemove
     const tableInstance = useTable<TableDataObject>(
@@ -116,7 +127,7 @@ const TableViewer = () => {
 
     return (
         <div style={{ maxHeight: "85vh" }}>
-            <table {...getTableProps()} className="w-full">
+            <table ref={ref} {...getTableProps()} className="w-full">
                 <thead>
                     {headerGroups.map((headerGroup) => (
                         <tr {...headerGroup.getHeaderGroupProps()}>
@@ -166,7 +177,14 @@ const TableViewer = () => {
                                                         : ""
                                                 }`}
                                             >
-                                                {<DirectoryButton onClick={() => {}}> Load </DirectoryButton>}
+                                                {
+                                                    <DirectoryButton
+                                                        onClick={() => {}}
+                                                    >
+                                                        {" "}
+                                                        Load{" "}
+                                                    </DirectoryButton>
+                                                }
                                             </td>
                                         );
                                     } else {
@@ -222,6 +240,6 @@ const TableViewer = () => {
             </tbody>
         </table>
     );
-};
+});
 
 export default TableViewer;

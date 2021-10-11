@@ -11,9 +11,10 @@ import { useCallback, useEffect, useState } from "react";
 import { directoriesActions } from "../../../store/directories-slice";
 import DirectoryButton from "../../../ui/DirectoryButton";
 
-import { get, set } from "idb-keyval";
+import { get, set, setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
 import RootState from "../../models/RootState";
+import ImageDetails from "../../models/ImageDetails";
 
 const calculate35mmFocalLength = (tags: {
     FocalLengthIn35mmFormat: number;
@@ -94,7 +95,15 @@ const DirectoryPicker = () => {
             const getFiles = async (
                 directory: FileSystemDirectoryHandle,
                 currentDirectoryPathArray: String[]
-            ) => {
+            ): Promise<{
+                directoriesToAdd: string[];
+                filesToAdd: { [key: string]: ImageDetails };
+                indexedDBtoAdd: [string, FileSystemHandle][];
+            }> => {
+                let directoriesToAdd: string[] = [];
+                let filesToAdd: { [key: string]: ImageDetails } = {};
+                let indexedDBtoAdd: [string, FileSystemHandle][] = [];
+
                 let directoryContainsAnotherDirectory = false; // Does this folder contain a nested folder?
 
                 let currentDirectoryHasFiles = false;
@@ -103,23 +112,53 @@ const DirectoryPicker = () => {
                     // Recursively iterate through all directories
                     try {
                         if (entry.kind === "directory") {
+                            // Note: Only for files that have a file extension that is supported OR is a directory
+                            // Add the FileHandle or DirectoryHandle to IndexedDB (handle --> 'entry')
+                            let pathToFile = currentDirectoryPathArray.join("/")
+                                ? `${currentDirectoryPathArray.join("/")}/${
+                                      entry.name
+                                  }`
+                                : entry.name;
+
+                            // todo
+                            indexedDBtoAdd.push([pathToFile, entry]);
+                            // await set(pathToFile, entry);
+
                             directoryContainsAnotherDirectory = true;
 
                             // console.log(`-- Found directory: ${entry.name} --`);
 
-                            dispatch(
-                                directoriesActions.addDirectory(
-                                    [
-                                        ...currentDirectoryPathArray,
-                                        entry.name,
-                                    ].join("/")
+                            // dispatch(
+                            //     directoriesActions.addDirectory(
+                            //         [
+                            //             ...currentDirectoryPathArray,
+                            //             entry.name,
+                            //         ].join("/")
+                            //     )
+                            // );
+
+                            directoriesToAdd.push(
+                                [...currentDirectoryPathArray, entry.name].join(
+                                    "/"
                                 )
                             );
 
-                            await getFiles(entry, [
+                            let recursiveResult = await getFiles(entry, [
                                 ...currentDirectoryPathArray,
                                 entry.name,
                             ]);
+
+                            // Add to the overall data object
+                            directoriesToAdd.push(
+                                ...recursiveResult.directoriesToAdd
+                            );
+                            filesToAdd = {
+                                ...filesToAdd,
+                                ...recursiveResult.filesToAdd,
+                            };
+                            indexedDBtoAdd.push(
+                                ...recursiveResult.indexedDBtoAdd
+                            );
                         } else {
                             currentDirectoryHasFiles = true;
                             // Ignore any filetypes that are not supported, as listed in CONSTANTS.json
@@ -131,6 +170,20 @@ const DirectoryPicker = () => {
                                     fileType.toLowerCase()
                                 )
                             ) {
+                                // Note: Only for files that have a file extension that is supported OR is a directory
+                                // Add the FileHandle or DirectoryHandle to IndexedDB (handle --> 'entry')
+                                let pathToFile = currentDirectoryPathArray.join(
+                                    "/"
+                                )
+                                    ? `${currentDirectoryPathArray.join("/")}/${
+                                          entry.name
+                                      }`
+                                    : entry.name;
+
+                                // todo
+                                indexedDBtoAdd.push([pathToFile, entry]);
+                                // await set(pathToFile, entry);
+
                                 let file = await entry.getFile();
 
                                 const fileData = await exifr.parse(
@@ -145,34 +198,61 @@ const DirectoryPicker = () => {
                                 let filePath =
                                     currentDirectoryPathArray.join("/");
 
-                                dispatch(
-                                    filesActions.addFile({
-                                        name: entry.name,
-                                        path: filePath,
-                                        aperture: fileData.FNumber,
-                                        focalLength:
-                                            calculate35mmFocalLength(fileData),
-                                        iso: fileData.ISO,
-                                        shutterSpeed:
-                                            Math.round(
-                                                10 / fileData.ExposureTime
-                                            ) / 10,
-                                        exposureCompensation:
-                                            fileData.ExposureCompensation,
-                                        exposureMode: fileData.ExposureProgram,
-                                        lensModel: fileData.LensModel,
-                                        cameraModel: fileData.Model,
-                                        whiteBalance: fileData.WhiteBalance,
-                                    })
+                                let fullPathToFile = filePath
+                                    ? `${filePath}/${file.name}`
+                                    : file.name;
+                                filesToAdd[fullPathToFile] = {
+                                    name: entry.name,
+                                    path: filePath,
+                                    aperture: fileData.FNumber,
+                                    focalLength:
+                                        calculate35mmFocalLength(fileData),
+                                    iso: fileData.ISO,
+                                    shutterSpeed:
+                                        Math.round(10 / fileData.ExposureTime) /
+                                        10,
+                                    exposureCompensation:
+                                        fileData.ExposureCompensation,
+                                    exposureMode: fileData.ExposureProgram,
+                                    lensModel: fileData.LensModel,
+                                    cameraModel: fileData.Model,
+                                    whiteBalance: fileData.WhiteBalance,
+                                };
+                                // dispatch(
+                                //     filesActions.addFile({
+                                //         name: entry.name,
+                                //         path: filePath,
+                                //         aperture: fileData.FNumber,
+                                //         focalLength:
+                                //             calculate35mmFocalLength(fileData),
+                                //         iso: fileData.ISO,
+                                //         shutterSpeed:
+                                //             Math.round(
+                                //                 10 / fileData.ExposureTime
+                                //             ) / 10,
+                                //         exposureCompensation:
+                                //             fileData.ExposureCompensation,
+                                //         exposureMode: fileData.ExposureProgram,
+                                //         lensModel: fileData.LensModel,
+                                //         cameraModel: fileData.Model,
+                                //         whiteBalance: fileData.WhiteBalance,
+                                //     })
+                                // );
+
+                                directoriesToAdd.push(
+                                    [
+                                        ...currentDirectoryPathArray,
+                                        entry.name,
+                                    ].join("/")
                                 );
-                                dispatch(
-                                    directoriesActions.addDirectory(
-                                        [
-                                            ...currentDirectoryPathArray,
-                                            entry.name,
-                                        ].join("/")
-                                    )
-                                );
+                                // dispatch(
+                                //     directoriesActions.addDirectory(
+                                //         [
+                                //             ...currentDirectoryPathArray,
+                                //             entry.name,
+                                //         ].join("/")
+                                //     )
+                                // );
 
                                 dispatch(
                                     statusActions.setStatus(
@@ -181,14 +261,6 @@ const DirectoryPicker = () => {
                                 );
                             }
                         }
-
-                        // Add the FileHandle or DirectoryHandle to IndexedDB (handle --> 'entry')
-                        let pathToFile = currentDirectoryPathArray.join("/")
-                            ? `${currentDirectoryPathArray.join("/")}/${
-                                  entry.name
-                              }`
-                            : entry.name;
-                        await set(pathToFile, entry);
                     } catch (e) {
                         console.log(
                             "There was an error parsing this file: ",
@@ -197,21 +269,47 @@ const DirectoryPicker = () => {
                         );
                     }
                 }
+
+                return { directoriesToAdd, filesToAdd, indexedDBtoAdd };
             };
+
+            // Request permission from user to scan the directories
             const dirHandle = await window.showDirectoryPicker();
-            console.log({dirHandle})
+
+            console.log({ dirHandle });
+
+            // Set status
             dispatch(statusActions.setStatus("Starting scan..."));
 
-            await getFiles(dirHandle, []);
-            dispatch(statusActions.setStatus(""));
+            // Start recursive function
+            const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
+                await getFiles(dirHandle, []);
+            console.log({ directoriesToAdd, filesToAdd, indexedDBtoAdd });
 
+            // Update the indexedDB
+            dispatch(statusActions.setStatus("Updating IndexedDB..."));
+            await setMany(indexedDBtoAdd);
+            dispatch(statusActions.setStatus("Completed updating IndexedDB"));
+
+            // Update the states with the new values (directoriesToAdd, filesToAdd)
+            dispatch(directoriesActions.setDirectories(directoriesToAdd));
+            dispatch(filesActions.setFiles(filesToAdd));
+
+            // Set status and construct directory tree
+            // dispatch(statusActions.setStatus("Constructing directory tree..."));
+            // dispatch(statusActions.setNextAction("dirtree"));
             dispatch(directoriesActions.constructTree());
+            // dispatch(statusActions.setStatus("Completed updating directory tree"))
         } catch (e) {
             console.log(e);
         }
     };
 
-    
+    // const
+    // useEffect(() => {
+
+    // })
+
     return (
         <div className="button-wrapper">
             {/* <div className="mx-1 inline">

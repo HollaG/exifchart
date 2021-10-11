@@ -117,7 +117,7 @@ const chartsSlice = createSlice({
     reducers: {
         updateChartData: (state, action: PayloadAction<ImageDetails[]>) => {
             // action.payload is an array of all selected images, each image being an Object (interface ImageDetails)
-            console.log("Updating Chart Data");
+            console.log("ChartSlice reducer: updateChartData");
             state.raw = action.payload;
             state.focalLength = {};
             state.aperture = {};
@@ -125,20 +125,20 @@ const chartsSlice = createSlice({
             state.iso = {};
         },
         generateChartData: (state) => {
-            if (objectIsEmpty(state.aperture)) {
-                // Only proceed with generating if it's not already generated
-                console.log("Generating aperture...");
+            console.log("ChartSlice reducer: generateChartData");
+            console.time("chartslice")
 
-                const images = state.raw;
-                console.log(images);
+            // Only proceed with generating if it's not already generated
 
-                interface DatasetObjectSchema {
-                    [key: string]: {
-                        [key: number]: number;
-                    };
-                }
+            const images = state.raw;
 
-                /*
+            interface DatasetObjectSchema {
+                [key: string]: {
+                    [key: number]: number;
+                };
+            }
+
+            /*
                     Sample object for dataSetObjects below
 
                     {
@@ -154,387 +154,380 @@ const chartsSlice = createSlice({
                     }
 
                 */
-                const focalLengthsFound: { [key: number]: 1 } = {};
-                const aperturesFound: { [key: number]: 1 } = {};
-                const shutterSpeedsFound: { [key: number]: 1 } = {};
-                const isosFound: { [key: number]: 1 } = {};
+            const focalLengthsFound: { [key: number]: 1 } = {};
+            const aperturesFound: { [key: number]: 1 } = {};
+            const shutterSpeedsFound: { [key: number]: 1 } = {};
+            const isosFound: { [key: number]: 1 } = {};
 
-                const dataSetObjectsFocalLength: DatasetObjectSchema = {};
-                const dataSetObjectsAperture: DatasetObjectSchema = {};
-                const dataSetObjectsShutterSpeed: DatasetObjectSchema = {};
-                const dataSetObjectsIso: DatasetObjectSchema = {};
+            const dataSetObjectsFocalLength: DatasetObjectSchema = {};
+            const dataSetObjectsAperture: DatasetObjectSchema = {};
+            const dataSetObjectsShutterSpeed: DatasetObjectSchema = {};
+            const dataSetObjectsIso: DatasetObjectSchema = {};
 
-                images.forEach((image) => {
-                    let cameraAndLensCombination = `${
-                        image.cameraModel || "Unknown"
-                    }||${image.lensModel || "Unknown"}`;
-
-                    /* Handling the FOCAL LENGTH Chart */
-
-                    if (!image.focalLength) {
-                        console.log(
-                            "This image's focal length was not parsed correctly: ",
-                            image
-                        );
-                    } else {
-                        let adjustedFocalLength =
-                            ROUNDING_FACTOR *
-                            Math.ceil(image.focalLength / ROUNDING_FACTOR);
-                        if (!focalLengthsFound[adjustedFocalLength])
-                            focalLengthsFound[adjustedFocalLength] = 1;
-                        else focalLengthsFound[adjustedFocalLength]++;
-
-                        // Check if this combi has already been added
-                        let combination =
-                            dataSetObjectsFocalLength[cameraAndLensCombination];
-                        if (!combination) {
-                            // Hasn't been added yet
-                            dataSetObjectsFocalLength[
-                                cameraAndLensCombination
-                            ] = {};
-                            dataSetObjectsFocalLength[cameraAndLensCombination][
-                                adjustedFocalLength
-                            ] = 1;
-                        } else {
-                            // Combination has already been added
-                            // Check if the focal length has been added
-                            if (!combination[adjustedFocalLength]) {
-                                // Hasn't been added yet, add it
-                                combination[adjustedFocalLength] = 1;
-                            } else {
-                                // Has already been added, increment number of pictures by 1
-                                combination[adjustedFocalLength]++;
-                            }
-                        }
-                    }
-
-                    /* Handling the APERTURE chart */
-                    if (!image.aperture) {
-                        console.log(
-                            "This image's aperture was not parsed correctly: ",
-                            image
-                        );
-                    } else {
-                        if (!aperturesFound[image.aperture])
-                            aperturesFound[image.aperture] = 1;
-                        else aperturesFound[image.aperture]++;
-
-                        // Check if this combi has already been added
-                        let combination =
-                            dataSetObjectsAperture[cameraAndLensCombination];
-                        if (!combination) {
-                            // Hasn't been added yet
-                            dataSetObjectsAperture[cameraAndLensCombination] =
-                                {};
-                            dataSetObjectsAperture[cameraAndLensCombination][
-                                image.aperture
-                            ] = 1;
-                        } else {
-                            // Combination has already been added
-                            // Check if the focal length has been added
-                            if (!combination[image.aperture]) {
-                                // Hasn't been added yet, add it
-                                combination[image.aperture] = 1;
-                            } else {
-                                // Has already been added, increment number of pictures by 1
-                                combination[image.aperture]++;
-                            }
-                        }
-                    }
-
-                    /* Handling the SHUTTER SPEED chart */
-                    if (!image.shutterSpeed) {
-                        console.log(
-                            "This image's shutterSpeed was not parsed correctly: ",
-                            image
-                        );
-                    } else {
-                        if (!shutterSpeedsFound[image.shutterSpeed])
-                            shutterSpeedsFound[image.shutterSpeed] = 1;
-                        else shutterSpeedsFound[image.shutterSpeed]++;
-
-                        // Check if this combi has already been added
-                        let combination =
-                            dataSetObjectsShutterSpeed[
-                                cameraAndLensCombination
-                            ];
-                        if (!combination) {
-                            // Hasn't been added yet
-                            dataSetObjectsShutterSpeed[
-                                cameraAndLensCombination
-                            ] = {};
-                            dataSetObjectsShutterSpeed[
-                                cameraAndLensCombination
-                            ][image.shutterSpeed] = 1;
-                        } else {
-                            // Combination has already been added
-                            // Check if the focal length has been added
-                            if (!combination[image.shutterSpeed]) {
-                                // Hasn't been added yet, add it
-                                combination[image.shutterSpeed] = 1;
-                            } else {
-                                // Has already been added, increment number of pictures by 1
-                                combination[image.shutterSpeed]++;
-                            }
-                        }
-                    }
-
-                    /* Handling the ISO chart */
-                    if (!image.iso) {
-                        console.log(
-                            "This image's iso was not parsed correctly: ",
-                            image
-                        );
-                    } else {
-                        if (!isosFound[image.iso]) isosFound[image.iso] = 1;
-                        else isosFound[image.iso]++;
-
-                        // Check if this combi has already been added
-                        let combination =
-                            dataSetObjectsIso[cameraAndLensCombination];
-                        if (!combination) {
-                            // Hasn't been added yet
-                            dataSetObjectsIso[cameraAndLensCombination] = {};
-                            dataSetObjectsIso[cameraAndLensCombination][
-                                image.iso
-                            ] = 1;
-                        } else {
-                            // Combination has already been added
-                            // Check if the focal length has been added
-                            if (!combination[image.iso]) {
-                                // Hasn't been added yet, add it
-                                combination[image.iso] = 1;
-                            } else {
-                                // Has already been added, increment number of pictures by 1
-                                combination[image.iso]++;
-                            }
-                        }
-                    }
-                });
-
-                console.log(dataSetObjectsFocalLength);
+            images.forEach((image) => {
+                let cameraAndLensCombination = `${
+                    image.cameraModel || "Unknown"
+                }||${image.lensModel || "Unknown"}`;
 
                 /* Handling the FOCAL LENGTH Chart */
 
-                const labelsFocalLength: string[] =
-                    Object.keys(focalLengthsFound); // Remember, Object.keys returns array of strings even though the keys are numbers
-                const datasetsFocalLength: DataSet[] = [];
+                if (!image.focalLength) {
+                    console.log(
+                        "This image's focal length was not parsed correctly: ",
+                        image
+                    );
+                } else {
+                    let adjustedFocalLength =
+                        ROUNDING_FACTOR *
+                        Math.ceil(image.focalLength / ROUNDING_FACTOR);
+                    if (!focalLengthsFound[adjustedFocalLength])
+                        focalLengthsFound[adjustedFocalLength] = 1;
+                    else focalLengthsFound[adjustedFocalLength]++;
 
-                const combinationsFocalLength = Object.keys(
-                    dataSetObjectsFocalLength
-                );
-                for (let i = 0; i < combinationsFocalLength.length; i++) {
-                    let combination = combinationsFocalLength[i];
+                    // Check if this combi has already been added
+                    let combination =
+                        dataSetObjectsFocalLength[cameraAndLensCombination];
+                    if (!combination) {
+                        // Hasn't been added yet
+                        dataSetObjectsFocalLength[cameraAndLensCombination] =
+                            {};
+                        dataSetObjectsFocalLength[cameraAndLensCombination][
+                            adjustedFocalLength
+                        ] = 1;
+                    } else {
+                        // Combination has already been added
+                        // Check if the focal length has been added
+                        if (!combination[adjustedFocalLength]) {
+                            // Hasn't been added yet, add it
+                            combination[adjustedFocalLength] = 1;
+                        } else {
+                            // Has already been added, increment number of pictures by 1
+                            combination[adjustedFocalLength]++;
+                        }
+                    }
+                }
 
-                    // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
-                    // each combination is a new Dataset
+                /* Handling the APERTURE chart */
+                if (!image.aperture) {
+                    console.log(
+                        "This image's aperture was not parsed correctly: ",
+                        image
+                    );
+                } else {
+                    if (!aperturesFound[image.aperture])
+                        aperturesFound[image.aperture] = 1;
+                    else aperturesFound[image.aperture]++;
 
-                    // Data - how to get?
-                    // We need to loop through all the labels ( which is focal length ).
-                    // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
-                    // If it is not, then add zero.
-                    // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+                    // Check if this combi has already been added
+                    let combination =
+                        dataSetObjectsAperture[cameraAndLensCombination];
+                    if (!combination) {
+                        // Hasn't been added yet
+                        dataSetObjectsAperture[cameraAndLensCombination] = {};
+                        dataSetObjectsAperture[cameraAndLensCombination][
+                            image.aperture
+                        ] = 1;
+                    } else {
+                        // Combination has already been added
+                        // Check if the focal length has been added
+                        if (!combination[image.aperture]) {
+                            // Hasn't been added yet, add it
+                            combination[image.aperture] = 1;
+                        } else {
+                            // Has already been added, increment number of pictures by 1
+                            combination[image.aperture]++;
+                        }
+                    }
+                }
 
-                    let data: number[] = [];
-                    labelsFocalLength.forEach((focalLength) => {
-                        let focalLengthNum = Number(focalLength);
-                        if (
+                /* Handling the SHUTTER SPEED chart */
+                if (!image.shutterSpeed) {
+                    console.log(
+                        "This image's shutterSpeed was not parsed correctly: ",
+                        image
+                    );
+                } else {
+                    if (!shutterSpeedsFound[Number(image.shutterSpeed)])
+                        shutterSpeedsFound[Number(image.shutterSpeed)] = 1;
+                    else shutterSpeedsFound[Number(image.shutterSpeed)]++;
+
+                    // Check if this combi has already been added
+                    let combination =
+                        dataSetObjectsShutterSpeed[cameraAndLensCombination];
+                    if (!combination) {
+                        // Hasn't been added yet
+                        dataSetObjectsShutterSpeed[cameraAndLensCombination] =
+                            {};
+                        dataSetObjectsShutterSpeed[cameraAndLensCombination][
+                            Number(image.shutterSpeed)
+                        ] = 1;
+                    } else {
+                        // Combination has already been added
+                        // Check if the focal length has been added
+                        if (!combination[Number(image.shutterSpeed)]) {
+                            // Hasn't been added yet, add it
+                            combination[Number(image.shutterSpeed)] = 1;
+                        } else {
+                            // Has already been added, increment number of pictures by 1
+                            combination[Number(image.shutterSpeed)]++;
+                        }
+                    }
+                }
+
+                /* Handling the ISO chart */
+                if (!image.iso) {
+                    console.log(
+                        "This image's iso was not parsed correctly: ",
+                        image
+                    );
+                } else {
+                    if (!isosFound[image.iso]) isosFound[image.iso] = 1;
+                    else isosFound[image.iso]++;
+
+                    // Check if this combi has already been added
+                    let combination =
+                        dataSetObjectsIso[cameraAndLensCombination];
+                    if (!combination) {
+                        // Hasn't been added yet
+                        dataSetObjectsIso[cameraAndLensCombination] = {};
+                        dataSetObjectsIso[cameraAndLensCombination][
+                            image.iso
+                        ] = 1;
+                    } else {
+                        // Combination has already been added
+                        // Check if the focal length has been added
+                        if (!combination[image.iso]) {
+                            // Hasn't been added yet, add it
+                            combination[image.iso] = 1;
+                        } else {
+                            // Has already been added, increment number of pictures by 1
+                            combination[image.iso]++;
+                        }
+                    }
+                }
+            });
+
+            /* Handling the FOCAL LENGTH Chart */
+
+            const labelsFocalLength: string[] = Object.keys(focalLengthsFound); // Remember, Object.keys returns array of strings even though the keys are numbers
+            const datasetsFocalLength: DataSet[] = [];
+
+            const combinationsFocalLength = Object.keys(
+                dataSetObjectsFocalLength
+            );
+            for (let i = 0; i < combinationsFocalLength.length; i++) {
+                let combination = combinationsFocalLength[i];
+
+                // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
+                // each combination is a new Dataset
+
+                // Data - how to get?
+                // We need to loop through all the labels ( which is focal length ).
+                // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
+                // If it is not, then add zero.
+                // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+
+                let data: number[] = [];
+                labelsFocalLength.forEach((focalLength) => {
+                    let focalLengthNum = Number(focalLength);
+                    if (
+                        dataSetObjectsFocalLength[combination][focalLengthNum]
+                    ) {
+                        data.push(
                             dataSetObjectsFocalLength[combination][
                                 focalLengthNum
                             ]
-                        ) {
-                            data.push(
-                                dataSetObjectsFocalLength[combination][
-                                    focalLengthNum
-                                ]
-                            );
-                        } else {
-                            data.push(0);
-                        }
-                    });
+                        );
+                    } else {
+                        data.push(0);
+                    }
+                });
 
-                    let dataset: DataSet = {
-                        label: combination.replace("||", " w/ "),
-                        data,
-                        backgroundColor: hexToRgbA(
-                            rainbow(combinationsFocalLength.length, i),
-                            "0.4"
-                        ),
-                        borderColor: rainbow(combinationsFocalLength.length, i),
-                        borderWidth: 2,
-                    };
-                    datasetsFocalLength.push(dataset);
-                }
-
-                state.focalLength = {
-                    labels: labelsFocalLength.map(focalLength => `${Number(focalLength) - 9} - ${focalLength} mm`),
-                    // labels: labelsFocalLength.map(focalLength => `${focalLength} mm`),
-                    datasets: datasetsFocalLength,
+                let dataset: DataSet = {
+                    label: combination.replace("||", " w/ "),
+                    data,
+                    backgroundColor: hexToRgbA(
+                        rainbow(combinationsFocalLength.length, i),
+                        "0.4"
+                    ),
+                    borderColor: rainbow(combinationsFocalLength.length, i),
+                    borderWidth: 2,
                 };
+                datasetsFocalLength.push(dataset);
+            }
 
-                /* Handling the Aperture Chart */
+            state.focalLength = {
+                labels: labelsFocalLength.map(
+                    (focalLength) =>
+                        `${Number(focalLength) - 9} - ${focalLength} mm`
+                ),
+                // labels: labelsFocalLength.map(focalLength => `${focalLength} mm`),
+                datasets: datasetsFocalLength,
+            };
 
-                const labelsAperture: string[] = Object.keys(aperturesFound); // Remember, Object.keys returns array of strings even though the keys are numbers
-                labelsAperture.sort((a, b) => Number(a) - Number(b));
-                const datasetsAperture: DataSet[] = [];
+            /* Handling the Aperture Chart */
 
-                const combinationsAperture = Object.keys(
-                    dataSetObjectsAperture
-                );
-                for (let i = 0; i < combinationsAperture.length; i++) {
-                    let combination = combinationsAperture[i];
+            const labelsAperture: string[] = Object.keys(aperturesFound); // Remember, Object.keys returns array of strings even though the keys are numbers
+            labelsAperture.sort((a, b) => Number(a) - Number(b));
+            const datasetsAperture: DataSet[] = [];
 
-                    // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
-                    // each combination is a new Dataset
+            const combinationsAperture = Object.keys(dataSetObjectsAperture);
+            for (let i = 0; i < combinationsAperture.length; i++) {
+                let combination = combinationsAperture[i];
 
-                    // Data - how to get?
-                    // We need to loop through all the labels ( which is focal length ).
-                    // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
-                    // If it is not, then add zero.
-                    // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+                // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
+                // each combination is a new Dataset
 
-                    let data: number[] = [];
-                    labelsAperture.forEach((aperture) => {
-                        let apertureNum = Number(aperture);
-                        if (dataSetObjectsAperture[combination][apertureNum]) {
-                            data.push(
-                                dataSetObjectsAperture[combination][apertureNum]
-                            );
-                        } else {
-                            data.push(0);
-                        }
-                    });
+                // Data - how to get?
+                // We need to loop through all the labels ( which is focal length ).
+                // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
+                // If it is not, then add zero.
+                // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
 
-                    let dataset: DataSet = {
-                        label: combination.replace("||", " w/ "),
-                        data,
-                        backgroundColor: hexToRgbA(
-                            rainbow(combinationsAperture.length, i),
-                            "0.4"
-                        ),
-                        borderColor: rainbow(combinationsAperture.length, i),
-                        borderWidth: 2,
-                    };
-                    datasetsAperture.push(dataset);
-                }
+                let data: number[] = [];
+                labelsAperture.forEach((aperture) => {
+                    let apertureNum = Number(aperture);
+                    if (dataSetObjectsAperture[combination][apertureNum]) {
+                        data.push(
+                            dataSetObjectsAperture[combination][apertureNum]
+                        );
+                    } else {
+                        data.push(0);
+                    }
+                });
 
-                state.aperture = {
-                    labels: labelsAperture.map(aperture => `f/${aperture}`),
-                    datasets: datasetsAperture,
+                let dataset: DataSet = {
+                    label: combination.replace("||", " w/ "),
+                    data,
+                    backgroundColor: hexToRgbA(
+                        rainbow(combinationsAperture.length, i),
+                        "0.4"
+                    ),
+                    borderColor: rainbow(combinationsAperture.length, i),
+                    borderWidth: 2,
                 };
+                datasetsAperture.push(dataset);
+            }
 
-                /* Handling the ShutterSpeed Chart */
+            state.aperture = {
+                labels: labelsAperture.map((aperture) => `f/${aperture}`),
+                datasets: datasetsAperture,
+            };
 
-                const labelsShutterSpeed: string[] =
-                    Object.keys(shutterSpeedsFound); // Remember, Object.keys returns array of strings even though the keys are numbers
-                labelsShutterSpeed.sort((a, b) => Number(b) - Number(a));
-                const datasetsShutterSpeed: DataSet[] = [];
+            /* Handling the ShutterSpeed Chart */
 
-                const combinationsShutterSpeed = Object.keys(
-                    dataSetObjectsShutterSpeed
-                );
-                for (let i = 0; i < combinationsShutterSpeed.length; i++) {
-                    let combination = combinationsShutterSpeed[i];
+            const labelsShutterSpeed: string[] =
+                Object.keys(shutterSpeedsFound); // Remember, Object.keys returns array of strings even though the keys are numbers
+            labelsShutterSpeed.sort((a, b) => Number(b) - Number(a));
+            const datasetsShutterSpeed: DataSet[] = [];
 
-                    // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
-                    // each combination is a new Dataset
+            const combinationsShutterSpeed = Object.keys(
+                dataSetObjectsShutterSpeed
+            );
+            for (let i = 0; i < combinationsShutterSpeed.length; i++) {
+                let combination = combinationsShutterSpeed[i];
 
-                    // Data - how to get?
-                    // We need to loop through all the labels ( which is focal length ).
-                    // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
-                    // If it is not, then add zero.
-                    // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+                // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
+                // each combination is a new Dataset
 
-                    let data: number[] = [];
-                    labelsShutterSpeed.forEach((shutterSpeed) => {
-                        let shutterSpeedNum = Number(shutterSpeed);
-                        if (
+                // Data - how to get?
+                // We need to loop through all the labels ( which is focal length ).
+                // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
+                // If it is not, then add zero.
+                // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+
+                let data: number[] = [];
+                labelsShutterSpeed.forEach((shutterSpeed) => {
+                    let shutterSpeedNum = Number(shutterSpeed);
+                    if (
+                        dataSetObjectsShutterSpeed[combination][shutterSpeedNum]
+                    ) {
+                        data.push(
                             dataSetObjectsShutterSpeed[combination][
                                 shutterSpeedNum
                             ]
-                        ) {
-                            data.push(
-                                dataSetObjectsShutterSpeed[combination][
-                                    shutterSpeedNum
-                                ]
-                            );
-                        } else {
-                            data.push(0);
-                        }
-                    });
+                        );
+                    } else {
+                        data.push(0);
+                    }
+                });
 
-                    let dataset: DataSet = {
-                        label: combination.replace("||", " w/ "),
-                        data,
-                        backgroundColor: hexToRgbA(
-                            rainbow(combinationsShutterSpeed.length, i),
-                            "0.4"
-                        ),
-                        borderColor: rainbow(combinationsShutterSpeed.length, i),
-                        borderWidth: 2,
-                    };
-                    datasetsShutterSpeed.push(dataset);
-                }
-
-                state.shutterSpeed = {
-                    labels: labelsShutterSpeed.map((ss) => {
-                        if (Number(ss) < 1) {
-                            return `${Math.round(10 / Number(ss)) / 10}"`;
-                        } else return `1/${Math.round(Number(ss))}`;
-                    }),
-                    datasets: datasetsShutterSpeed,
+                let dataset: DataSet = {
+                    label: combination.replace("||", " w/ "),
+                    data,
+                    backgroundColor: hexToRgbA(
+                        rainbow(combinationsShutterSpeed.length, i),
+                        "0.4"
+                    ),
+                    borderColor: rainbow(combinationsShutterSpeed.length, i),
+                    borderWidth: 2,
                 };
+                datasetsShutterSpeed.push(dataset);
+            }
 
-                /* Handling the ISO Chart */
+            state.shutterSpeed = {
+                labels: labelsShutterSpeed.map((ss) => {
+                    if (Number(ss) < 1) {
+                        return `${Math.round(10 / Number(ss)) / 10}"`;
+                    } else if (Number(ss) === 1) {
+                        return "1";
+                    } else return `1/${Math.round(Number(ss))}`;
+                }),
+                datasets: datasetsShutterSpeed,
+            };
 
-                const labelsIso: string[] = Object.keys(isosFound); // Remember, Object.keys returns array of strings even though the keys are numbers
-                const datasetsIso: DataSet[] = [];
+            /* Handling the ISO Chart */
 
-                const combinationsIso = Object.keys(dataSetObjectsIso);
-                for (let i = 0; i < combinationsIso.length; i++) {
-                    let combination = combinationsIso[i];
+            const labelsIso: string[] = Object.keys(isosFound); // Remember, Object.keys returns array of strings even though the keys are numbers
+            const datasetsIso: DataSet[] = [];
 
-                    // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
-                    // each combination is a new Dataset
+            const combinationsIso = Object.keys(dataSetObjectsIso);
+            for (let i = 0; i < combinationsIso.length; i++) {
+                let combination = combinationsIso[i];
 
-                    // Data - how to get?
-                    // We need to loop through all the labels ( which is focal length ).
-                    // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
-                    // If it is not, then add zero.
-                    // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+                // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
+                // each combination is a new Dataset
 
-                    let data: number[] = [];
-                    labelsIso.forEach((iso) => {
-                        let isoNum = Number(iso);
-                        if (dataSetObjectsIso[combination][isoNum]) {
-                            data.push(dataSetObjectsIso[combination][isoNum]);
-                        } else {
-                            data.push(0);
-                        }
-                    });
+                // Data - how to get?
+                // We need to loop through all the labels ( which is focal length ).
+                // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
+                // If it is not, then add zero.
+                // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
 
-                    let dataset: DataSet = {
-                        label: combination.replace("||", " w/ "),
-                        data,
-                        backgroundColor: hexToRgbA(
-                            rainbow(combinationsIso.length, i),
-                            "0.4"
-                        ),
-                        borderColor: rainbow(combinationsIso.length, i),
-                        borderWidth: 2,
-                    };
-                    datasetsIso.push(dataset);
-                }
+                let data: number[] = [];
+                labelsIso.forEach((iso) => {
+                    let isoNum = Number(iso);
+                    if (dataSetObjectsIso[combination][isoNum]) {
+                        data.push(dataSetObjectsIso[combination][isoNum]);
+                    } else {
+                        data.push(0);
+                    }
+                });
 
-                state.iso = {
-                    labels: labelsIso,
-                    datasets: datasetsIso,
+                let dataset: DataSet = {
+                    label: combination.replace("||", " w/ "),
+                    data,
+                    backgroundColor: hexToRgbA(
+                        rainbow(combinationsIso.length, i),
+                        "0.4"
+                    ),
+                    borderColor: rainbow(combinationsIso.length, i),
+                    borderWidth: 2,
                 };
+                datasetsIso.push(dataset);
+            }
 
-                return;
-                // const aperturesFound: { [key: number]: 1 } = {};
+            state.iso = {
+                labels: labelsIso,
+                datasets: datasetsIso,
+            };
+            console.log("Done!")
+            console.timeEnd("chartslice")
 
-                /*
+           
+            // const aperturesFound: { [key: number]: 1 } = {};
+
+            /*
                     Sample object for apertures below
 
                     {
@@ -544,36 +537,35 @@ const chartsSlice = createSlice({
 
                 */
 
-                // images.forEach((image) => {
-                //     if (image.aperture) {
-                //         if (!aperturesFound[image.aperture])
-                //             aperturesFound[image.aperture] = 1;
-                //         else aperturesFound[image.aperture]++;
-                //     }
-                // });
-                // console.log({ aperturesFound });
+            // images.forEach((image) => {
+            //     if (image.aperture) {
+            //         if (!aperturesFound[image.aperture])
+            //             aperturesFound[image.aperture] = 1;
+            //         else aperturesFound[image.aperture]++;
+            //     }
+            // });
+            // console.log({ aperturesFound });
 
-                // const apertureArray: string[] = Object.keys(aperturesFound); // Remember! Strings from Object.keys
-                // apertureArray.sort((a, b) => Number(a) - Number(b));
+            // const apertureArray: string[] = Object.keys(aperturesFound); // Remember! Strings from Object.keys
+            // apertureArray.sort((a, b) => Number(a) - Number(b));
 
-                // const labels: string[] = [];
-                // const dataset: number[] = [];
-                // apertureArray.forEach((aperture) => {
-                //     labels.push(aperture);
-                //     dataset.push(aperturesFound[Number(aperture)]);
-                // });
+            // const labels: string[] = [];
+            // const dataset: number[] = [];
+            // apertureArray.forEach((aperture) => {
+            //     labels.push(aperture);
+            //     dataset.push(aperturesFound[Number(aperture)]);
+            // });
 
-                // const datasets: DataSet[] = [
-                //     {
-                //         label: "Aperture",
-                //         data: dataset,
-                //     },
-                // ];
-                // state.aperture = {
-                //     labels,
-                //     datasets,
-                // };
-            }
+            // const datasets: DataSet[] = [
+            //     {
+            //         label: "Aperture",
+            //         data: dataset,
+            //     },
+            // ];
+            // state.aperture = {
+            //     labels,
+            //     datasets,
+            // };
         },
     },
 });

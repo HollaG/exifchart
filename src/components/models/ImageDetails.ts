@@ -4,7 +4,7 @@ export default interface ImageDetails {
     aperture: number,
     focalLength: number,
     iso: number,
-    shutterSpeed: number,
+    shutterSpeed: number|string,
     exposureCompensation: number,    
     exposureMode: string,
     lensModel: string,

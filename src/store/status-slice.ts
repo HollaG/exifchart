@@ -24,6 +24,9 @@ const statusSlice = createSlice({
                 state.scanning = false
                 state.text = ""
             }
+        },
+        setNextAction(state, action:PayloadAction<string>) { 
+            state.nextAction = action.payload
         }
     },
 });

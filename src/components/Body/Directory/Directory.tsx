@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DirectoryButton from "../../../ui/DirectoryButton";
 import RootState from "../../models/RootState";
@@ -13,6 +13,8 @@ import imageCompression from "browser-image-compression";
 import Container from "../../../ui/Container";
 import ContainerHeader from "../../../ui/ContainerHeader";
 import ContainerContents from "../../../ui/ContainerContents";
+import TableDataObject from "../../models/TableDataObject";
+import { filesActions } from "../../../store/files-slice";
 
 // const loadedDirectories: FileSystemDirectoryHandle[] = [];
 
@@ -25,6 +27,7 @@ const imageCompressionOptions = {
 const Directory = () => {
     const [checked, setChecked] = useState<string[]>([]);
     const [expanded, setExpanded] = useState<string[]>([]);
+    const [allowChartReRender, setAllowChartReRender] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -38,12 +41,17 @@ const Directory = () => {
         (state: RootState) => state.directories.folderList
     );
     const imageMap = useSelector((state: RootState) => state.files.files);
+    // allowChartReRenders = false // re-set to zero once component rerenderes due to useSelector changing
+    useEffect(() => {
+        setAllowChartReRender(false);
+    }, [mapOfFolderOrFileIdToImage, folderList, imageMap]);
 
     const chartDataHandler = useCallback(() => {
-        console.log("Running chart data handler")
-        if (!checked.length) return;
+        if (!checked.length || !allowChartReRender) return;
+        console.log("Running chart data handler", { checked });
 
         let imageDataArray: ImageDetails[] = [];
+        let tableDataArray: TableDataObject[] = [];
 
         // For each checked item, reach out to "mapFolderOrFileIdToImage" in the Directories slice
         for (const checkedItemId of checked) {
@@ -66,13 +74,37 @@ const Directory = () => {
                         // console.log("Found image")
                         let imageData = imageMap[filePath];
                         imageDataArray.push(imageData);
+
+
+                        
+                        let formattedShutter = "";
+                        
+                        let ss = imageData.shutterSpeed
+                        if (Number(ss) < 1) {
+                            formattedShutter = `${Math.round(10 / Number(ss)) / 10}"`;
+                        } else if (Number(ss) === 1) {
+                            formattedShutter = "1"
+                        } else formattedShutter= `1/${Math.round(Number(ss))}`;
+                        tableDataArray.push({
+                            ...imageData,
+                            id: index,
+                            path: filePath,
+                            image: "Load",                            
+                            shutterSpeed: formattedShutter,
+                            
+                        });
                     }
                 }
             }
         }
 
+        
         dispatch(chartsActions.updateChartData(imageDataArray));
         dispatch(chartsActions.generateChartData());
+        
+        dispatch(filesActions.setFilteredTableData(tableDataArray));
+        
+
     }, [checked, dispatch, folderList, imageMap, mapOfFolderOrFileIdToImage]);
 
     useEffect(chartDataHandler, [checked, chartDataHandler]);
@@ -89,7 +121,7 @@ const Directory = () => {
         let folderPathIndex = mapOfFolderOrFileIdToImage[targetNodeId];
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
-            if (!filePath) return console.log("Missing filePath!!!")
+            if (!filePath) return console.log("Missing filePath!!!");
             // Try to get the file handle from IndexedDB
             let fileHandle: FileSystemFileHandle | undefined | string =
                 await get(filePath);
@@ -138,19 +170,24 @@ const Directory = () => {
         }
     };
 
-    
+    const scanningStatusText = useSelector(
+        (state: RootState) => state.status.text
+    );
 
-    const scanningStatus = useSelector((state:RootState) => state.status)
+    const setItemCheckedHandler = (
+        checkedArray: React.SetStateAction<string[]>
+    ) => {
+        console.log("item check handler");
+        setChecked(checkedArray)
+        setAllowChartReRender(true); // Only allow the function in useCallback() to run once the user starts
+    };
 
-    
     return (
         <Container width="xl:w-96">
             <ContainerHeader>
                 <h1 className="flex-grow text-xl px-3">Directory picker</h1>
                 <div className="">
-                    <DirectoryPicker                       
-                        
-                    />
+                    <DirectoryPicker />
                 </div>
             </ContainerHeader>
             <ContainerContents>
@@ -160,22 +197,21 @@ const Directory = () => {
                         maxHeight: "calc(85vh - 260px)",
                     }}
                 >
-                    {scanningStatus?.scanning && (
+                    {scanningStatusText && (
                         <p className="whitespace-nowrap truncate">
-                            {scanningStatus.text}
+                            {scanningStatusText}
                         </p>
                     )}
                     <DirectoryViewer
                         checked={checked}
-                        setChecked={setChecked}
+                        setChecked={setItemCheckedHandler}
                         expanded={expanded}
                         setExpanded={setExpanded}
                         onImageSelected={onImageSelected}
                     />
                 </div>
             </ContainerContents>
-           <ImagePreview {...image} />
-            
+            <ImagePreview {...image} />
         </Container>
     );
 

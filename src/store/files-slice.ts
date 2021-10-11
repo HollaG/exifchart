@@ -17,6 +17,8 @@ const filesSlice = createSlice({
     initialState,
     reducers: {
         addFile: (state, action: PayloadAction<ImageDetails>) => {
+            console.log("FilesSlice reducer: addFile");
+
             // If the file is not nested, don't add a slash in front (action.payload.path is empty. This would result in /image1.jpg, which is wrong. It should be image1.jpg only.)
             let file = action.payload;
             let pathToFile = file.path
@@ -40,6 +42,46 @@ const filesSlice = createSlice({
             //     whiteBalance: file.whiteBalance,
             // });
         },
+        setFiles: (
+            state,
+            action: PayloadAction<{ [key: string]: ImageDetails }>
+        ) => {
+            console.log("FilesSlice reducer: setFiles");
+
+            state.files = { ...state.files, ...action.payload };
+            state.tableData = [
+                ...state.tableData,
+                ...Object.keys(action.payload).map((key, index) => {
+                    let pathToFile = action.payload[key].path
+                        ? `${action.payload[key].path}/${action.payload[key].name}`
+                        : action.payload[key].name;
+                    let ss = action.payload[key].shutterSpeed;
+                    let formattedShutter = "";
+                    
+
+                    if (Number(ss) < 1) {
+                        formattedShutter = `${Math.round(10 / Number(ss)) / 10}"`;
+                    } else if (Number(ss) === 1) {
+                        formattedShutter = "1"
+                    } else formattedShutter= `1/${Math.round(Number(ss))}`;
+                    return {
+                        ...action.payload[key],
+                        id: index + 1,
+                        path: pathToFile,
+                        shutterSpeed: formattedShutter,
+                        image: "Load"
+                    };
+                }),
+            ];
+        },
+        setFilteredTableData(state, action:PayloadAction<TableDataObject[]>) {
+            console.log("Filteirng table data")
+            console.time("table")
+            state.tableData = action.payload
+            console.log("Filteirng table data done")
+
+            console.timeEnd("table")
+        }
     },
 });
 
