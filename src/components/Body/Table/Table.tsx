@@ -67,7 +67,7 @@ const Table = () => {
                 </DirectoryButton>
             </ContainerHeader>
             <ContainerContents>
-                {/* <TableViewer ref={tableRef} /> */}
+                <TableViewer ref={tableRef} />
             </ContainerContents>
         </Container>
     );

@@ -61,7 +61,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
     const rawData: TableDataObject[] = useSelector(
         (state: RootState) => state.files.tableData
     );
-    const data = useMemo(() => rawData, []);
+    const data = useMemo(() => rawData, [rawData]);
     // const columns: Column<TableDataObject>[] = useMemo(
     //     () => [
     //         {
