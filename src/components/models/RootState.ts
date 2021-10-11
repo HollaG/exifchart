@@ -1,10 +1,16 @@
-import { resultInterface } from "./DirectoryStructure";
+import ChartData from "./ChartData";
+import DirectoryStructure, { resultInterface } from "./DirectoryStructure";
 import ImageDetails from "./ImageDetails";
+import Status from "./Status";
 
 export default interface RootState {
-    files: ImageDetails[],
-    directories: {
-        rootFolder: resultInterface[],
-		folderList: string[]
-    }
+    files: { files: { [key: string]: ImageDetails }; selectedIDs: string[] };
+    directories: DirectoryStructure,
+    charts: {
+        focalLength: ChartData,
+        aperture: ChartData,
+        shutterSpeed: ChartData,
+        iso: ChartData
+    },
+    status: Status
 }

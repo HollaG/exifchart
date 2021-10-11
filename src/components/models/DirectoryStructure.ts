@@ -1,6 +1,8 @@
 export default interface DirectoryStructure { 
     rootFolder: resultInterface[],
-    folderList: string[]
+    folderList: string[],
+    mapFolderOrFileIdToImage: {[key:string]: number},
+    constructing: boolean
 
 }
 export interface resultInterface {

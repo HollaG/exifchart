@@ -1,17 +1,25 @@
 import {
-    faCheckSquare,
+    // faCheckSquare,
     faChevronDown,
     faChevronRight,
+    faFile,
     faFolder,
     faFolderOpen,
+    faImage,
+    // faMinusSquare,
+    // faPlusSquare,
+    // faSquare,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+    faCheckSquare,
+    faSquare,
     faMinusSquare,
     faPlusSquare,
-    faSquare,
-} from "@fortawesome/free-solid-svg-icons";
+} from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { useEffect, useRef, useState } from "react";
-import CheckboxTree from "react-checkbox-tree";
+import React, { useEffect, useRef, useState } from "react";
+import CheckboxTree, { Node, OnCheckNode } from "react-checkbox-tree";
 import "react-checkbox-tree/lib/react-checkbox-tree.css";
 import { findDOMNode } from "react-dom";
 import { useSelector } from "react-redux";
@@ -32,7 +40,21 @@ const removeEmptyArrays = (data: resultInterface[]) => {
     }
 };
 
-const DirectoryViewer = () => {
+interface DirectoryViewerProps {
+    checked: string[];
+    setChecked: React.Dispatch<React.SetStateAction<string[]>>;
+    expanded: string[];
+    setExpanded: React.Dispatch<React.SetStateAction<string[]>>;
+    onImageSelected: (targetNodeId:string) => void
+}
+
+const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
+    checked,
+    setChecked,
+    expanded,
+    setExpanded,
+    onImageSelected
+}) => {
     // const files = useSelector((state:RootState) => state.files)
     // console.log(files)
 
@@ -53,34 +75,26 @@ const DirectoryViewer = () => {
                 .map((imported) => imported.value)
                 .slice(-1);
             setExpanded((prevState) => [newItemIndex.toString(), ...prevState]);
-            console.log(tree.current)
-            const currentTree = findDOMNode(tree.current);
-            // below line makes first node of the tree focused after the tree load
-            // (tree.current?.firstChild?.firstChild as HTMLElement)
-            //     ?.querySelector<HTMLElement>(".rct-node-clickable")
-            //     ?.focus();
+            console.log(tree.current);
         }
     }, [directories]);
 
-    const [checked, setChecked] = useState<string[]>([]);
-    const [expanded, setExpanded] = useState<string[]>([]);
-
-    // Expand by default?
-    // useEffect(() => {
-    //     // setExpanded((prevState) => [...expandedDefault, ...prevState])
-    //     setExpanded(expandedDefault)
-    // }, [directories])
-
-    console.log("first", checked);
-
-    const checkHandler = (checked: string[]) => {
+    const checkHandler = (checked: string[], targetNode: OnCheckNode) => {
         setChecked(checked);
-        console.log(checked);
+
+        
     };
 
     const expandHandler = (expanded: string[]) => {
         setExpanded(expanded);
         console.log({ expanded });
+    };
+
+    const clickHandler = (targetNode: OnCheckNode) => {
+        console.log(targetNode);
+        
+        onImageSelected(targetNode.value)
+        // 
     };
     return (
         <CheckboxTree
@@ -90,6 +104,7 @@ const DirectoryViewer = () => {
             expanded={expanded}
             onCheck={checkHandler}
             onExpand={expandHandler}
+            onClick={clickHandler}
             iconsClass="fa5"
             showExpandAll={true}
             icons={{
@@ -137,20 +152,20 @@ const DirectoryViewer = () => {
                 ),
                 parentClose: (
                     <FontAwesomeIcon
-                        className="rct-icon rct-icon-parent-close"
+                        className="rct-icon rct-icon-parent-close text-gray-700"
                         icon={faFolder}
                     />
                 ),
                 parentOpen: (
                     <FontAwesomeIcon
-                        className="rct-icon rct-icon-parent-open"
+                        className="rct-icon rct-icon-parent-open text-blue-700"
                         icon={faFolderOpen}
                     />
                 ),
                 leaf: (
                     <FontAwesomeIcon
-                        className="rct-icon rct-icon-leaf-close"
-                        icon={faFolder}
+                        className="rct-icon rct-icon-leaf-close text-gray-700"
+                        icon={faImage}
                     />
                 ),
             }}

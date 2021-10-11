@@ -1,4 +1,5 @@
 {
     "SUPPORTED_FILETYPES": ["jpg", "png"],
-    "EXIF_TAGS": ["FNumber", "FocalLength", "ISO", "ExposureCompensation", "ExposureTime", "ExposureProgram", "LensModel", "Model", "WhiteBalance"]
+    "EXIF_TAGS": ["FNumber", "FocalLength", "ISO", "ExposureCompensation", "ExposureTime", "ExposureProgram", "LensModel", "Model", "WhiteBalance"],
+    "FF_DIAGONAL_INCHES": 1.7027559
 }

@@ -8,3 +8,38 @@ https://www.npmjs.com/package/react-checkbox-tree
 span.rct-collapse { 
 	width: 17.5px !important
 }
+
+/* This style is to prevent scrollbar from repositioning elements on the page. */
+html { 
+    overflow-y: scroll;
+}
+
+/* This style is to ensure that the directory (section.directory-section) is the same height as the chart, when the size of the viewport is greater than xl (1280px). */
+/* @media (min-width: 1280px) { 
+    section.directory-section { 
+        height: calc(100% - 66px);
+    }
+} */
+
+/* This style is to ensure that the chart does NOT go below this size */
+/* .min-size-wrapper-chart { 
+    min-width: 500px;
+    min-height: 500px;       
+} */
+
+/* This style is to ensure that the directory selector does NOT go below this size, ONLY WHEN the viewport is less than xl:1280px.
+   Below 1280px, the directory is stacked on top of the chart.
+*/
+.min-size-wrapper-directory { 
+    min-width: 500px;
+
+}
+@media only screen and (min-width: 1280px) {  
+    /* Above xl breakpoint, the directory is to the left of the chart. Hence, we can collapse  */
+    .min-size-wrapper-directory { 
+        min-width: 0px;
+         
+    }
+}
+
+
