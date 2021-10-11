@@ -98,11 +98,11 @@ const DirectoryPicker = () => {
             ): Promise<{
                 directoriesToAdd: string[];
                 filesToAdd: { [key: string]: ImageDetails };
-                indexedDBtoAdd: [string, FileSystemHandle][];
+                indexedDBtoAdd: [string, {entry: FileSystemHandle, thumbnail: string}][];
             }> => {
                 let directoriesToAdd: string[] = [];
                 let filesToAdd: { [key: string]: ImageDetails } = {};
-                let indexedDBtoAdd: [string, FileSystemHandle][] = [];
+                let indexedDBtoAdd: [string, {entry: FileSystemHandle, thumbnail: string}][] = [];
 
                 let directoryContainsAnotherDirectory = false; // Does this folder contain a nested folder?
 
@@ -121,7 +121,7 @@ const DirectoryPicker = () => {
                                 : entry.name;
 
                             // todo
-                            indexedDBtoAdd.push([pathToFile, entry]);
+                            indexedDBtoAdd.push([pathToFile, {entry, thumbnail: ""}]);
                             // await set(pathToFile, entry);
 
                             directoryContainsAnotherDirectory = true;
@@ -181,7 +181,7 @@ const DirectoryPicker = () => {
                                     : entry.name;
 
                                 // todo
-                                indexedDBtoAdd.push([pathToFile, entry]);
+                                indexedDBtoAdd.push([pathToFile, {entry, thumbnail: ""}]);
                                 // await set(pathToFile, entry);
 
                                 let file = await entry.getFile();
@@ -275,6 +275,8 @@ const DirectoryPicker = () => {
 
             // Request permission from user to scan the directories
             const dirHandle = await window.showDirectoryPicker();
+            let timeStart = performance.now()
+            console.time("timer")
 
             console.log({ dirHandle });
 
@@ -299,7 +301,12 @@ const DirectoryPicker = () => {
             // dispatch(statusActions.setStatus("Constructing directory tree..."));
             // dispatch(statusActions.setNextAction("dirtree"));
             dispatch(directoriesActions.constructTree());
-            // dispatch(statusActions.setStatus("Completed updating directory tree"))
+
+            console.log("Done!")
+            console.timeEnd("timer")
+            let timeTaken =  Math.round(((performance.now() - timeStart) / 1000) * 100) / 100
+            dispatch(statusActions.setStatus(`Completed! (${timeTaken} seconds)`))
+            setTimeout(() => dispatch(statusActions.setStatus("")), 5000)
         } catch (e) {
             console.log(e);
         }

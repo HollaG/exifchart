@@ -15,6 +15,7 @@ import ContainerHeader from "../../../ui/ContainerHeader";
 import ContainerContents from "../../../ui/ContainerContents";
 import TableDataObject from "../../models/TableDataObject";
 import { filesActions } from "../../../store/files-slice";
+import { modalActions } from "../../../store/modal-slice";
 
 // const loadedDirectories: FileSystemDirectoryHandle[] = [];
 
@@ -75,36 +76,32 @@ const Directory = () => {
                         let imageData = imageMap[filePath];
                         imageDataArray.push(imageData);
 
-
-                        
                         let formattedShutter = "";
-                        
-                        let ss = imageData.shutterSpeed
+
+                        let ss = imageData.shutterSpeed;
                         if (Number(ss) < 1) {
-                            formattedShutter = `${Math.round(10 / Number(ss)) / 10}"`;
+                            formattedShutter = `${
+                                Math.round(10 / Number(ss)) / 10
+                            }"`;
                         } else if (Number(ss) === 1) {
-                            formattedShutter = "1"
-                        } else formattedShutter= `1/${Math.round(Number(ss))}`;
+                            formattedShutter = "1";
+                        } else formattedShutter = `1/${Math.round(Number(ss))}`;
                         tableDataArray.push({
                             ...imageData,
                             id: index,
                             path: filePath,
-                            image: "Load",                            
+                            image: "Load",
                             shutterSpeed: formattedShutter,
-                            
                         });
                     }
                 }
             }
         }
 
-        
         dispatch(chartsActions.updateChartData(imageDataArray));
         dispatch(chartsActions.generateChartData());
-        
-        dispatch(filesActions.setFilteredTableData(tableDataArray));
-        
 
+        dispatch(filesActions.setFilteredTableData(tableDataArray));
     }, [checked, dispatch, folderList, imageMap, mapOfFolderOrFileIdToImage]);
 
     useEffect(chartDataHandler, [checked, chartDataHandler]);
@@ -123,19 +120,20 @@ const Directory = () => {
             let filePath = folderList[folderPathIndex];
             if (!filePath) return console.log("Missing filePath!!!");
             // Try to get the file handle from IndexedDB
-            let fileHandle: FileSystemFileHandle | undefined | string =
-                await get(filePath);
+            let idbFile:
+                | { entry: FileSystemFileHandle; thumbnail: string }
+                | undefined = await get(filePath);
 
-            if (!fileHandle)
+            if (!idbFile)
                 return console.log(
                     "No file handle found - error occured somewhere?"
                 );
 
-            if (typeof fileHandle === "string") {
+            if (idbFile.thumbnail) {
                 // Previously loaded into DB
                 console.log("File string found");
                 setImage({
-                    src: fileHandle,
+                    src: idbFile.thumbnail,
                     path: filePath,
                 });
             } else {
@@ -143,16 +141,18 @@ const Directory = () => {
                 console.log("File handle found");
 
                 try {
-                    console.log(fileHandle);
-                    let imageBlob = await fileHandle.getFile();
+                    let imageBlob = await idbFile.entry.getFile();
                     let compressedImage = await imageCompression(
                         imageBlob,
                         imageCompressionOptions
                     );
                     let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
 
-                    // Override the FileSystemFileHandle
-                    await set(filePath, imageSrc);
+                    // Add thumbnail to the db
+                    await set(filePath, {
+                        entry: idbFile.entry,
+                        thumbnail: imageSrc,
+                    });
 
                     setImage({
                         src: imageSrc,
@@ -170,6 +170,28 @@ const Directory = () => {
         }
     };
 
+    const onBigViewHandler = async (path: string) => {
+        // console.log(path) // Definitely exists in IDB
+        // get the file reference
+        let idbFile:
+            | { entry: FileSystemFileHandle; thumbnail: string }
+            | undefined = await get(path);
+
+        if (!idbFile) return
+        let imageBlob = await idbFile.entry.getFile();       
+        let imageSrc = URL.createObjectURL(imageBlob);
+
+        let image = imageMap[path]
+        let text = ""
+        if (image) {
+            text = `Shot on ${image.cameraModel || "unknown"} w/ ${image.lensModel || "unknown"}. ${image.focalLength || "unknown"}mm | ${image.aperture && `f/${image.aperture}`} | ${image.shutterSpeed && image.shutterSpeed} | ISO ${image.iso && image.iso}`
+        } 
+        dispatch(modalActions.setModal({
+            src: imageSrc,
+            text: text
+        }))
+    };
+
     const scanningStatusText = useSelector(
         (state: RootState) => state.status.text
     );
@@ -178,7 +200,7 @@ const Directory = () => {
         checkedArray: React.SetStateAction<string[]>
     ) => {
         console.log("item check handler");
-        setChecked(checkedArray)
+        setChecked(checkedArray);
         setAllowChartReRender(true); // Only allow the function in useCallback() to run once the user starts
     };
 
@@ -211,7 +233,7 @@ const Directory = () => {
                     />
                 </div>
             </ContainerContents>
-            <ImagePreview {...image} />
+            <ImagePreview {...image} onBigViewHandler={onBigViewHandler} />
         </Container>
     );
 

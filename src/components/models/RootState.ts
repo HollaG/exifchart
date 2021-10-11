@@ -1,3 +1,4 @@
+import { ModalStructure } from "../../store/modal-slice";
 import ChartData from "./ChartData";
 import DirectoryStructure, { resultInterface } from "./Directory";
 import FilesStructure from "./Files";
@@ -13,5 +14,6 @@ export default interface RootState {
         shutterSpeed: ChartData,
         iso: ChartData
     },
-    status: Status
+    status: Status,
+    modal: ModalStructure
 }
