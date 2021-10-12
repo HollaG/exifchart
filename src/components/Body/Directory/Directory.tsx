@@ -177,19 +177,34 @@ const Directory = () => {
             | { entry: FileSystemFileHandle; thumbnail: string }
             | undefined = await get(path);
 
-        if (!idbFile) return
-        let imageBlob = await idbFile.entry.getFile();       
+        if (!idbFile) return;
+        let imageBlob = await idbFile.entry.getFile();
         let imageSrc = URL.createObjectURL(imageBlob);
 
-        let image = imageMap[path]
-        let text = ""
-        if (image) {
-            text = `Shot on ${image.cameraModel || "unknown"} w/ ${image.lensModel || "unknown"}. ${image.focalLength || "unknown"}mm | ${image.aperture && `f/${image.aperture}`} | ${image.shutterSpeed && image.shutterSpeed} | ISO ${image.iso && image.iso}`
-        } 
-        dispatch(modalActions.setModal({
-            src: imageSrc,
-            text: text
-        }))
+        let image = imageMap[path];
+        // let text = "";
+        // if (image) {
+        //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
+        //         image.lensModel || "unknown"
+        //     }. ${image.focalLength || "unknown"}mm | ${
+        //         image.aperture && `f/${image.aperture}`
+        //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
+        //         image.iso && image.iso
+        //     }`;
+        // }
+        dispatch(
+            modalActions.setModal({
+                src: imageSrc,
+                detailObject: {
+                    cameraModel: image.cameraModel,
+                    lensModel: image.lensModel,
+                    aperture: image.aperture,
+                    shutterSpeed: Number(image.shutterSpeed),
+                    focalLength: image.focalLength,
+                    iso: image.iso,
+                },
+            })
+        );
     };
 
     const scanningStatusText = useSelector(
@@ -214,15 +229,20 @@ const Directory = () => {
             </ContainerHeader>
             <ContainerContents>
                 <div
-                    className="min-size-wrapper-directory h-100 "
+                    className="min-size-wrapper-directory h-100 break-all"
                     style={{
                         maxHeight: "calc(85vh - 260px)",
                     }}
                 >
                     {scanningStatusText && (
-                        <p className="whitespace-nowrap truncate">
-                            {scanningStatusText}
-                        </p>
+                        <div>
+                            <p className="whitespace-nowrap text-end overflow-ellipsis overflow-hidden">
+                                {scanningStatusText.split("<br/>")[0]}
+                            </p>
+                            <p className="whitespace-nowrap text-end overflow-ellipsis overflow-hidden">
+                                {scanningStatusText.split("<br/>")[1]}
+                            </p>
+                        </div>
                     )}
                     <DirectoryViewer
                         checked={checked}

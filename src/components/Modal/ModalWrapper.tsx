@@ -4,7 +4,7 @@ import { modalActions } from "../../store/modal-slice";
 import RootState from "../models/RootState";
 
 
-const ModalWrapper: React.FC<{ src: string, text:string }> = ({ src,text }) => {
+const ModalWrapper: React.FC<{ src: string, title:string, desc: string }> = ({ src,title, desc }) => {
     const dispatch = useDispatch()
     const closeModalHandler = () => {
         dispatch(modalActions.clearModal())
@@ -21,14 +21,18 @@ const ModalWrapper: React.FC<{ src: string, text:string }> = ({ src,text }) => {
             }}
         >
             <div className="relative" style={{ width: "95vw", height: "95vh" }}>
-                <div className="bg-gray-100 inline p-2 absolute rounded-lg border-4 border-gray-400 hover:invisible" style={{                  
+                <div className="bg-gray-100 inline p-2 absolute rounded-lg border-4 border-gray-400 hover:opacity-0 text-center" style={{                  
                     left: "50%",
                     transform: "translate(-50%, 0)",
                     bottom: "1%",
-                    maxWidth: '500px'
+                    maxWidth: '500px',
+                    transition: 'opacity 150ms ease-in-out'
                     
                 }}> 
-                    {text}
+                    
+                    {title}
+                    <br/>
+                    {desc}
                     
                 </div>
                 <img

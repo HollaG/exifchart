@@ -256,7 +256,7 @@ const DirectoryPicker = () => {
 
                                 dispatch(
                                     statusActions.setStatus(
-                                        `Found ${filePath}/${entry.name}`
+                                        `Found ${entry.name}<br/>in directory: ${filePath ? filePath : "/"}`
                                     )
                                 );
                             }

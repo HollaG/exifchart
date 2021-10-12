@@ -18,7 +18,7 @@ function App() {
                 <Header />
                 <Body />
             </main>
-            {modal.src && <ModalWrapper src={modal.src} text={modal.text}/>}
+            {modal.src && <ModalWrapper src={modal.src} title={modal.title} desc={modal.desc}/>}
         </>
     );
 }

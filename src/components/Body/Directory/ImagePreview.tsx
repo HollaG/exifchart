@@ -18,7 +18,7 @@ const ImagePreview: React.FC<{ src: string; path: string, onBigViewHandler: (pat
                 {src ? (
                     <>
                         <p
-                            className="absolute bg-gray-100 border-gray-500 border-2 rounded py-1 px-2 bottom-2 right-2 text-xs text-right"
+                            className="absolute bg-gray-100 border-gray-500 border-2 rounded py-1 px-2 bottom-2 right-2 text-xs text-right break-all"
                             style={{ maxWidth: "75%" }}
                         >
                             {" "}

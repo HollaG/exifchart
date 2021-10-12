@@ -167,27 +167,42 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
     } = tableInstance;
 
     const imageMap = useSelector((state: RootState) => state.files.files);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     const viewImageHandler = async (cell: Cell<TableDataObject>) => {
-       
-        let path = cell.row.original.path
+        let path = cell.row.original.path;
         let idbFile:
             | { entry: FileSystemFileHandle; thumbnail: string }
             | undefined = await get(path);
 
-        if (!idbFile) return
-        let imageBlob = await idbFile.entry.getFile();       
+        if (!idbFile) return;
+        let imageBlob = await idbFile.entry.getFile();
         let imageSrc = URL.createObjectURL(imageBlob);
 
-        let image = imageMap[path]
-        let text = ""
-        if (image) {
-            text = `Shot on ${image.cameraModel || "unknown"} w/ ${image.lensModel || "unknown"}. ${image.focalLength || "unknown"}mm | ${image.aperture && `f/${image.aperture}`} | ${image.shutterSpeed && ` SS 1/${image.shutterSpeed}`} | ISO ${image.iso && image.iso}`
-        } 
-        dispatch(modalActions.setModal({
-            src: imageSrc,
-            text: text
-        }))
+        let image = imageMap[path];
+        // let text = "";
+        // if (image) {
+        //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
+        //         image.lensModel || "unknown"
+        //     }. ${image.focalLength || "unknown"}mm | ${
+        //         image.aperture && `f/${image.aperture}`
+        //     } | ${image.shutterSpeed && ` SS 1/${image.shutterSpeed}`} | ISO ${
+        //         image.iso && image.iso
+        //     }`;
+        // }
+        dispatch(
+            modalActions.setModal({
+                src: imageSrc,
+                // text: text
+                detailObject: {
+                    cameraModel: image.cameraModel,
+                    lensModel: image.lensModel,
+                    aperture: image.aperture,
+                    shutterSpeed: Number(image.shutterSpeed),
+                    focalLength: image.focalLength,
+                    iso: image.iso,
+                },
+            })
+        );
     };
 
     return (
