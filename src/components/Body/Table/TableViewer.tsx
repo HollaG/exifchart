@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import RootState from "../../models/RootState";
 import {
     Cell,
-    Column,
-    TableOptions,
     usePagination,
     useSortBy,
     useTable,
@@ -14,125 +12,20 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DirectoryButton from "../../../ui/DirectoryButton";
 import TableDataObject from "../../models/TableDataObject";
 import { columns } from "../../../config/table_config";
-
-import { createSelector } from "reselect";
 import useWindowDimensions from "../../../hooks/use-window-dimensions";
 import { get } from "idb-keyval";
 import { modalActions } from "../../../store/modal-slice";
-const selectTableData = createSelector(
-    (state: RootState) => state.files.tableData,
-    (tableData) => tableData
-);
+
 
 const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
-    // const filesObject = useSelector((state: RootState) => state.files.files);
-    console.log("tableviwer rerendering");
-
-    const { height, width } = useWindowDimensions();
-
-    console.log(height);
-    const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1;
-
-    // interface DataObject {
-    //     id: number;
-    //     filePath: string;
-    //     image: string;
-    //     cameraModel: string;
-    //     lensModel: string;
-    //     focalLength: number;
-    //     shutterSpeed: number;
-    //     aperture: number;
-    //     iso: number;
-    //     exposureMode: string;
-    //     exposureComp: number;
-    //     whiteBalance: string;
-    // }
-    // const data: DataObject[] = useMemo(() => {
-    //     let fileArr = [];
-
-    //     let fileIDs = Object.keys(filesObject);
-    //     for (let i = fileIDs.length - 1; i > 0; i--) {
-    //         let filePath = fileIDs[i];
-    //         let file = filesObject[filePath];
-
-    //         fileArr.push({
-    //             id: i,
-    //             filePath,
-    //             image: "Load",
-    //             cameraModel: file.cameraModel,
-    //             lensModel: file.lensModel,
-    //             focalLength: file.focalLength,
-    //             shutterSpeed: file.shutterSpeed,
-    //             aperture: file.aperture,
-    //             iso: file.iso,
-    //             exposureMode: file.exposureMode,
-    //             exposureComp: file.exposureCompensation,
-    //             whiteBalance: file.whiteBalance,
-    //         });
-    //     }
-
-    //     return fileArr;
-    // }, [filesObject]);
+    const { height } = useWindowDimensions();    
+    const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1;   
 
     const rawData: TableDataObject[] = useSelector(
         (state: RootState) => state.files.tableData
     );
     const data = useMemo(() => rawData, [rawData]);
-    // const columns: Column<TableDataObject>[] = useMemo(
-    //     () => [
-    //         {
-    //             Header: "#",
-    //             accessor: "id" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "File Path",
-    //             accessor: "path" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Preview",
-    //             accessor: "image" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Camera Model",
-    //             accessor: "cameraModel" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Lens Model",
-    //             accessor: "lensModel" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Focal Length (35mm equiv)",
-    //             accessor: "focalLength" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Shutter Speed",
-    //             accessor: "shutterSpeed" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Aperture",
-    //             accessor: "aperture" as keyof TableDataObject,
-    //         },
-
-    //         {
-    //             Header: "ISO",
-    //             accessor: "iso" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Exposure Mode",
-    //             accessor: "exposureMode" as keyof TableDataObject,
-    //         },
-    //         {
-    //             Header: "Exposure Compensation" as keyof TableDataObject,
-    //             accessor: "exposureCompensation",
-    //         },
-    //         {
-    //             Header: "White Balance",
-    //             accessor: "whiteBalance" as keyof TableDataObject,
-    //         },
-    //     ],
-    //     []
-    // );
-
+    
     // See https://github.com/tannerlinsley/react-table/discussions/2848 for disableSortRemove
     const tableInstance = useTable<TableDataObject>(
         {
@@ -149,7 +42,6 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         getTableProps,
         getTableBodyProps,
         headerGroups,
-        rows,
         prepareRow,
         page, // Instead of using 'rows', we'll use page,
         // which has only the rows for the active page
@@ -161,9 +53,8 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         pageCount,
         gotoPage,
         nextPage,
-        previousPage,
-        setPageSize,
-        state: { pageIndex, pageSize },
+        previousPage,        
+        state: { pageIndex },
     } = tableInstance;
 
     const imageMap = useSelector((state: RootState) => state.files.files);
@@ -178,21 +69,10 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         let imageBlob = await idbFile.entry.getFile();
         let imageSrc = URL.createObjectURL(imageBlob);
 
-        let image = imageMap[path];
-        // let text = "";
-        // if (image) {
-        //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
-        //         image.lensModel || "unknown"
-        //     }. ${image.focalLength || "unknown"}mm | ${
-        //         image.aperture && `f/${image.aperture}`
-        //     } | ${image.shutterSpeed && ` SS 1/${image.shutterSpeed}`} | ISO ${
-        //         image.iso && image.iso
-        //     }`;
-        // }
+        let image = imageMap[path];        
         dispatch(
             modalActions.setModal({
-                src: imageSrc,
-                // text: text
+                src: imageSrc,                
                 detailObject: {
                     cameraModel: image.cameraModel,
                     lensModel: image.lensModel,
@@ -343,37 +223,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
             </table>
         </div>
     );
-    return (
-        <table {...getTableProps()}>
-            <thead>
-                {headerGroups.map((headerGroup) => {
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map((column) => {
-                            <th {...column.getHeaderProps()}>
-                                {column.render("Header")}
-                            </th>;
-                        })}
-                    </tr>;
-                })}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map((row) => {
-                    prepareRow(row);
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map((cell) => {
-                                return (
-                                    <td {...cell.getCellProps()}>
-                                        {cell.render("Cell")}
-                                    </td>
-                                );
-                            })}
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </table>
-    );
+    
 });
 
 export default TableViewer;

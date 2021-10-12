@@ -1,7 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { modalActions } from "../../store/modal-slice";
-import RootState from "../models/RootState";
+
 
 
 const ModalWrapper: React.FC<{ src: string, title:string, desc: string }> = ({ src,title, desc }) => {
@@ -42,6 +42,7 @@ const ModalWrapper: React.FC<{ src: string, title:string, desc: string }> = ({ s
                         objectFit: "contain",
                     }}
                     onClick={closeModalHandler}
+                    alt={`Big preview for ${title}`}
                 />
             </div>
             {/* <div className="flex" style={{ width: "85vw", height: "85vh" }}>

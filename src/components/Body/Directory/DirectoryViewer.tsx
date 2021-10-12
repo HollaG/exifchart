@@ -1,14 +1,9 @@
 import {
-    // faCheckSquare,
     faChevronDown,
     faChevronRight,
-    faFile,
     faFolder,
     faFolderOpen,
     faImage,
-    // faMinusSquare,
-    // faPlusSquare,
-    // faSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import {
     faCheckSquare,
@@ -18,10 +13,9 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import React, { useEffect, useRef, useState } from "react";
-import CheckboxTree, { Node, OnCheckNode } from "react-checkbox-tree";
+import React, { useEffect, useRef } from "react";
+import CheckboxTree, { OnCheckNode } from "react-checkbox-tree";
 import "react-checkbox-tree/lib/react-checkbox-tree.css";
-import { findDOMNode } from "react-dom";
 import { useSelector } from "react-redux";
 
 import { resultInterface } from "../../models/Directory";
@@ -55,9 +49,6 @@ const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
     setExpanded,
     onImageSelected
 }) => {
-    // const files = useSelector((state:RootState) => state.files)
-    // console.log(files)
-
     const tree = useRef<CheckboxTree>(null);
 
     const directories = useSelector(
@@ -70,14 +61,13 @@ const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
     removeEmptyArrays(cleaned);
     useEffect(() => {
         if (directories.length) {
-            console.log("Use effect running");
             const newItemIndex = directories
                 .map((imported) => imported.value)
                 .slice(-1);
             setExpanded((prevState) => [newItemIndex.toString(), ...prevState]);
-            console.log(tree.current);
+
         }
-    }, [directories]);
+    }, [directories, setExpanded]);
 
     const checkHandler = (checked: string[], targetNode: OnCheckNode) => {
         setChecked(checked);
@@ -87,14 +77,10 @@ const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
 
     const expandHandler = (expanded: string[]) => {
         setExpanded(expanded);
-        console.log({ expanded });
     };
 
     const clickHandler = (targetNode: OnCheckNode) => {
-        console.log(targetNode);
-        
         onImageSelected(targetNode.value)
-        // 
     };
     return (
         <CheckboxTree

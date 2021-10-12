@@ -79,7 +79,6 @@ const modalSlice = createSlice({
 
         },
         clearModal(state) {
-            console.log("Clearmodal")
             state.src = ""
         },
     },

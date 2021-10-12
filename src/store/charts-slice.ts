@@ -17,10 +17,7 @@ const initialState: {
 };
 
 const ROUNDING_FACTOR = 10;
-const objectIsEmpty = (obj: Object) =>
-    obj &&
-    Object.keys(obj).length === 0 &&
-    Object.getPrototypeOf(obj) === Object.prototype;
+
 
 const rainbow = (numOfSteps: number, step: number) => {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
@@ -76,7 +73,7 @@ const hexToRgbA = (hex: string, opacity: string) => {
     var c;
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
         c = hex.substring(1).split("");
-        if (c.length == 3) {
+        if (c.length === 3) {
             c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
         c = "0x" + c.join("");
@@ -94,22 +91,7 @@ const hexToRgbA = (hex: string, opacity: string) => {
     }
     throw new Error("Bad Hex");
 };
-function adjust(color: string, amount: number) {
-    return (
-        "#" +
-        color
-            .replace(/^#/, "")
-            .replace(/../g, (color) =>
-                (
-                    "0" +
-                    Math.min(
-                        255,
-                        Math.max(0, parseInt(color, 16) + amount)
-                    ).toString(16)
-                ).substr(-2)
-            )
-    );
-}
+
 
 const chartsSlice = createSlice({
     initialState,
@@ -117,7 +99,7 @@ const chartsSlice = createSlice({
     reducers: {
         updateChartData: (state, action: PayloadAction<ImageDetails[]>) => {
             // action.payload is an array of all selected images, each image being an Object (interface ImageDetails)
-            console.log("ChartSlice reducer: updateChartData");
+            // console.log("ChartSlice reducer: updateChartData");
             state.raw = action.payload;
             state.focalLength = {};
             state.aperture = {};
@@ -125,8 +107,8 @@ const chartsSlice = createSlice({
             state.iso = {};
         },
         generateChartData: (state) => {
-            console.log("ChartSlice reducer: generateChartData");
-            console.time("chartslice")
+            // console.log("ChartSlice reducer: generateChartData");
+
 
             // Only proceed with generating if it's not already generated
 
@@ -521,8 +503,8 @@ const chartsSlice = createSlice({
                 labels: labelsIso,
                 datasets: datasetsIso,
             };
-            console.log("Done!")
-            console.timeEnd("chartslice")
+
+
 
            
             // const aperturesFound: { [key: number]: 1 } = {};

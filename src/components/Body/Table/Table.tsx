@@ -7,11 +7,10 @@ import TableViewer from "./TableViewer";
 import XLSX from "xlsx";
 import { useSelector } from "react-redux";
 import RootState from "../../models/RootState";
-import { columns } from "../../../config/table_config";
-import React, { useRef } from "react";
+import React from "react";
 
-
-function s2ab(s:any) {
+// Convert string to array buffer
+function s2ab(s:string) {
     const buf = new ArrayBuffer(s.length)
 
     const view = new Uint8Array(buf)
@@ -21,16 +20,6 @@ function s2ab(s:any) {
 
     return buf
 }
-
-function make_cols(refstr:string) {
-    var o = [];
-    var range = XLSX.utils.decode_range(refstr);
-    for(var i = 0; i <= range.e.c; ++i) {
-      o.push({name: XLSX.utils.encode_col(i), key:i});
-    }
-    return o;
-  }
-
 const Table = () => {
 
     const tableRef = React.createRef<HTMLTableElement>()
@@ -38,28 +27,25 @@ const Table = () => {
     const tableData = useSelector((state:RootState) => state.files.tableData)
 
     const exportToExcelHandler = () => {
-        let cols = columns.map(column => {return {"name": column.Header, "key": column.accessor}})
+        // let cols = columns.map(column => {return {"name": column.Header, "key": column.accessor}})
         let data = tableData.map(row => [row.id, row.path, row.cameraModel, row.lensModel, row.focalLength, row.shutterSpeed, row.aperture, row.iso, row.exposureMode, row.exposureCompensation, row.whiteBalance])
-        // console.log(data)
+
 
         data.unshift(["#", "File Path", "Camera Model", "Lens Model", "Focal Length", "Shutter Speed", "Aperture", "ISO", "Exposure Mode", "Exposure Compensation", "White Balance"])
         let worksheet = XLSX.utils.aoa_to_sheet(data)
         let new_workbook = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(new_workbook, worksheet, "EXIFChart")
-        // make_cols("EXIFChart")
+
         
         let wbout = XLSX.write(new_workbook, {bookType:'xlsx', bookSST:true, type: 'binary'})
         let blob = window.URL.createObjectURL(new Blob([s2ab(wbout)], {type:''}))
         
 
 
-        // console.log(tableRef.current)
+        // Using ref - ignore as this is only for without pagination
         // let wb = XLSX.utils.table_to_book(tableRef.current, {raw: true})
         // let wbout = XLSX.write(wb, {bookType:'xlsx', bookSST:true, type: 'binary'})
-
-        // console.log(wb)
         // let blob = URL.createObjectURL(new Blob([s2ab(wbout)], {type:''}))
-
         saveAs(blob, "EXIFChart.xlsx")
     }
 

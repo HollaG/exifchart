@@ -1,5 +1,4 @@
-import { useSelector } from "react-redux";
-import React, { useRef, useState } from "react";
+import React, {  useState } from "react";
 
 import ChartPicker from "./ChartPicker";
 import ChartViewer from "./ChartViewer";
@@ -16,8 +15,7 @@ const ChartWrapper = () => {
     const chartRef = React.createRef<ChartItem>();
 
     const saveChartAsImage = () => {
-        console.log("Downloading...");
-        console.log(chartRef)
+        // console.log("Downloading...");
         if (chartRef && chartRef.current) {
             const canvas = chartRef.current.canvas;
             canvas.toBlob(function(blob: Blob) {
@@ -42,16 +40,6 @@ const ChartWrapper = () => {
         </Container>
     )
 
-    return (
-        <>
-            <ChartPicker
-                saveChartAsImage={saveChartAsImage}
-                setShownGraph={setShownGraph}
-                shownGraph={shownGraph}
-            />
-            <ChartViewer ref={chartRef} shownGraph={shownGraph} />
-        </>
-    );
 };
 
 export default ChartWrapper;

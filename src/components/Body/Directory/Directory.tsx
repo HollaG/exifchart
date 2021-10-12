@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import DirectoryButton from "../../../ui/DirectoryButton";
 import RootState from "../../models/RootState";
 import DirectoryPicker from "./DirectoryPicker";
 import DirectoryViewer from "./DirectoryViewer";
 import ImageDetails from "../../models/ImageDetails";
 import { chartsActions } from "../../../store/charts-slice";
 import ImagePreview from "./ImagePreview";
-
 import { get, set } from "idb-keyval";
 import imageCompression from "browser-image-compression";
 import Container from "../../../ui/Container";
@@ -49,7 +47,7 @@ const Directory = () => {
 
     const chartDataHandler = useCallback(() => {
         if (!checked.length || !allowChartReRender) return;
-        console.log("Running chart data handler", { checked });
+
 
         let imageDataArray: ImageDetails[] = [];
         let tableDataArray: TableDataObject[] = [];
@@ -102,7 +100,7 @@ const Directory = () => {
         dispatch(chartsActions.generateChartData());
 
         dispatch(filesActions.setFilteredTableData(tableDataArray));
-    }, [checked, dispatch, folderList, imageMap, mapOfFolderOrFileIdToImage]);
+    }, [checked, dispatch, folderList, imageMap, mapOfFolderOrFileIdToImage, allowChartReRender]);
 
     useEffect(chartDataHandler, [checked, chartDataHandler]);
 
@@ -113,12 +111,10 @@ const Directory = () => {
 
     const onImageSelected = async (targetNodeId: string) => {
         // Goal: Get the filePath as it is a key in IndexedDB whose value is the FileHandle
-
-        console.log({ mapOfFolderOrFileIdToImage, targetNodeId });
         let folderPathIndex = mapOfFolderOrFileIdToImage[targetNodeId];
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
-            if (!filePath) return console.log("Missing filePath!!!");
+            if (!filePath) return console.log("Missing file path!");
             // Try to get the file handle from IndexedDB
             let idbFile:
                 | { entry: FileSystemFileHandle; thumbnail: string }
@@ -131,14 +127,14 @@ const Directory = () => {
 
             if (idbFile.thumbnail) {
                 // Previously loaded into DB
-                console.log("File string found");
+                // console.log("File string found");
                 setImage({
                     src: idbFile.thumbnail,
                     path: filePath,
                 });
             } else {
                 // File handle found. Load as BLOB
-                console.log("File handle found");
+                // console.log("File handle found");
 
                 try {
                     let imageBlob = await idbFile.entry.getFile();
@@ -166,7 +162,7 @@ const Directory = () => {
                 }
             }
         } else {
-            console.log("no index!");
+            // console.log("no index!");
         }
     };
 
@@ -214,7 +210,6 @@ const Directory = () => {
     const setItemCheckedHandler = (
         checkedArray: React.SetStateAction<string[]>
     ) => {
-        console.log("item check handler");
         setChecked(checkedArray);
         setAllowChartReRender(true); // Only allow the function in useCallback() to run once the user starts
     };

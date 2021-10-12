@@ -1,4 +1,4 @@
-import React, { Ref } from "react";
+import React from "react";
 
 import { useSelector } from "react-redux";
 import RootState from "../../models/RootState";
@@ -72,49 +72,7 @@ const ChartViewer = React.forwardRef<
         </>
     )
     
-    return (
-        <div className="charts-contents p-4 border-gray-100 rounded-b border-4">
-            {shownGraph === "" ? (
-                <p>
-                    Select some directories to get started, then select the
-                    camera metric you wish to analyze in the top right corner.
-                </p>
-            ) : (
-                <div className="chart-container" style={{ height: "85vh" }}>
-                    <div className="min-size-wrapper-chart h-full">
-                        {shownGraph === "focalLength" && (
-                            <Bar
-                                data={focalLengthChartData}
-                                options={chartOptions}
-                                ref={ref}
-                            />
-                        )}
-                        {shownGraph === "aperture" && (
-                            <Bar
-                                data={apertureChartData}
-                                options={chartOptions}
-                                ref={ref}
-                            />
-                        )}
-                        {shownGraph === "iso" && (
-                            <Bar
-                                data={isoChartData}
-                                options={chartOptions}
-                                ref={ref}
-                            />
-                        )}
-                        {shownGraph === "shutterSpeed" && (
-                            <Bar
-                                data={shutterSpeedChartData}
-                                options={chartOptions}
-                                ref={ref}
-                            />
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+   
 });
 
 export default ChartViewer;

@@ -1,19 +1,11 @@
-// This file is in .jsx and not .tsx because Typescript does not support window.showDirectoryPicker().
-
-import Button from "../../../ui/Button";
-
 import * as CONSTANTS from "../../../config/CONSTANTS.json";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { filesActions } from "../../../store/files-slice";
-
 import exifr from "exifr";
-import { useCallback, useEffect, useState } from "react";
 import { directoriesActions } from "../../../store/directories-slice";
 import DirectoryButton from "../../../ui/DirectoryButton";
-
-import { get, set, setMany } from "idb-keyval";
+import { setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
-import RootState from "../../models/RootState";
 import ImageDetails from "../../models/ImageDetails";
 
 const calculate35mmFocalLength = (tags: {
@@ -98,15 +90,17 @@ const DirectoryPicker = () => {
             ): Promise<{
                 directoriesToAdd: string[];
                 filesToAdd: { [key: string]: ImageDetails };
-                indexedDBtoAdd: [string, {entry: FileSystemHandle, thumbnail: string}][];
+                indexedDBtoAdd: [
+                    string,
+                    { entry: FileSystemHandle; thumbnail: string }
+                ][];
             }> => {
                 let directoriesToAdd: string[] = [];
                 let filesToAdd: { [key: string]: ImageDetails } = {};
-                let indexedDBtoAdd: [string, {entry: FileSystemHandle, thumbnail: string}][] = [];
-
-                let directoryContainsAnotherDirectory = false; // Does this folder contain a nested folder?
-
-                let currentDirectoryHasFiles = false;
+                let indexedDBtoAdd: [
+                    string,
+                    { entry: FileSystemHandle; thumbnail: string }
+                ][] = [];
 
                 for await (const entry of directory.values()) {
                     // Recursively iterate through all directories
@@ -121,10 +115,13 @@ const DirectoryPicker = () => {
                                 : entry.name;
 
                             // todo
-                            indexedDBtoAdd.push([pathToFile, {entry, thumbnail: ""}]);
+                            indexedDBtoAdd.push([
+                                pathToFile,
+                                { entry, thumbnail: "" },
+                            ]);
                             // await set(pathToFile, entry);
 
-                            directoryContainsAnotherDirectory = true;
+                            
 
                             // console.log(`-- Found directory: ${entry.name} --`);
 
@@ -160,7 +157,6 @@ const DirectoryPicker = () => {
                                 ...recursiveResult.indexedDBtoAdd
                             );
                         } else {
-                            currentDirectoryHasFiles = true;
                             // Ignore any filetypes that are not supported, as listed in CONSTANTS.json
                             let fileType = entry.name.split(".").pop();
 
@@ -181,7 +177,10 @@ const DirectoryPicker = () => {
                                     : entry.name;
 
                                 // todo
-                                indexedDBtoAdd.push([pathToFile, {entry, thumbnail: ""}]);
+                                indexedDBtoAdd.push([
+                                    pathToFile,
+                                    { entry, thumbnail: "" },
+                                ]);
                                 // await set(pathToFile, entry);
 
                                 let file = await entry.getFile();
@@ -256,7 +255,11 @@ const DirectoryPicker = () => {
 
                                 dispatch(
                                     statusActions.setStatus(
-                                        `Found ${entry.name}<br/>in directory: ${filePath ? filePath : "/"}`
+                                        `Found ${
+                                            entry.name
+                                        }<br/>in directory: ${
+                                            filePath ? filePath : "/"
+                                        }`
                                     )
                                 );
                             }
@@ -275,10 +278,7 @@ const DirectoryPicker = () => {
 
             // Request permission from user to scan the directories
             const dirHandle = await window.showDirectoryPicker();
-            let timeStart = performance.now()
-            console.time("timer")
-
-            console.log({ dirHandle });
+            let timeStart = performance.now();
 
             // Set status
             dispatch(statusActions.setStatus("Starting scan..."));
@@ -286,7 +286,7 @@ const DirectoryPicker = () => {
             // Start recursive function
             const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
                 await getFiles(dirHandle, []);
-            console.log({ directoriesToAdd, filesToAdd, indexedDBtoAdd });
+
 
             // Update the indexedDB
             dispatch(statusActions.setStatus("Updating IndexedDB..."));
@@ -302,11 +302,13 @@ const DirectoryPicker = () => {
             // dispatch(statusActions.setNextAction("dirtree"));
             dispatch(directoriesActions.constructTree());
 
-            console.log("Done!")
-            console.timeEnd("timer")
-            let timeTaken =  Math.round(((performance.now() - timeStart) / 1000) * 100) / 100
-            dispatch(statusActions.setStatus(`Completed! (${timeTaken} seconds)`))
-            setTimeout(() => dispatch(statusActions.setStatus("")), 5000)
+            let timeTaken =
+                Math.round(((performance.now() - timeStart) / 1000) * 100) /
+                100;
+            dispatch(
+                statusActions.setStatus(`Completed! (${timeTaken} seconds)`)
+            );
+            setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
         } catch (e) {
             console.log(e);
         }

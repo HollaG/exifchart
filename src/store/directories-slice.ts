@@ -22,7 +22,7 @@ const directoriesSlice = createSlice({
             state.folderList.push(action.payload);
         },
         setDirectories: (state, action: PayloadAction<string[]>) => {
-            console.log("DirectoriesSlice reducer: setDirectories");
+            // console.log("DirectoriesSlice reducer: setDirectories");
 
             state.folderList.push(...action.payload)
         },
@@ -30,7 +30,7 @@ const directoriesSlice = createSlice({
             state.constructing = true;
         },
         constructTree(state) {
-            console.log("DirectoriesSlice reducer: constructTree");
+            // console.log("DirectoriesSlice reducer: constructTree");
 
 
             const directories = state.folderList;
@@ -61,7 +61,7 @@ const directoriesSlice = createSlice({
                     
                 });
             }
-            console.log({ indexToStartIterating });
+
 
             for (let i = indexToStartIterating; i < directories.length; i++) {
                 let path = directories[i];
@@ -84,7 +84,7 @@ const directoriesSlice = createSlice({
                 }, level);
             }
 
-            console.log("Completed directory tree construction");
+            // console.log("Completed directory tree construction");
             state.rootFolder.push({
                 value: state.rootFolder.length.toString(),
                 label: `Import ${state.rootFolder.length + 1}`,
