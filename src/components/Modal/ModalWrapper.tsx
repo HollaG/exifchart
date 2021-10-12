@@ -4,7 +4,7 @@ import { modalActions } from "../../store/modal-slice";
 
 
 
-const ModalWrapper: React.FC<{ src: string, title:string, desc: string }> = ({ src,title, desc }) => {
+const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string }> = ({ src,title, desc, path }) => {
     const dispatch = useDispatch()
     const closeModalHandler = () => {
         dispatch(modalActions.clearModal())
@@ -33,6 +33,8 @@ const ModalWrapper: React.FC<{ src: string, title:string, desc: string }> = ({ s
                     {title}
                     <br/>
                     {desc}
+                    <br/>
+                    {path}
                     
                 </div>
                 <img

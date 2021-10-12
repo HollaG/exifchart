@@ -4,7 +4,8 @@ export interface ModalStructure {
     src: string;
     details: DetailObject;
     title: string,
-    desc: string
+    desc: string,
+    path: string
 
 }
 
@@ -27,7 +28,8 @@ const initialState: ModalStructure = {
         shutterSpeed: 0,
     },
     title: '',
-    desc: ''
+    desc: '',
+    path: ''
 };
 
 const modalSlice = createSlice({
@@ -40,6 +42,7 @@ const modalSlice = createSlice({
                 src: string;
                 title?: string;
                 detailObject: DetailObject;
+                path: string
             }>
         ) {
             state.src = action.payload.src;
@@ -76,6 +79,7 @@ const modalSlice = createSlice({
             else desc.push("Unknown ISO")
 
             state.desc = desc.join(" | ")
+            state.path = action.payload.path
 
         },
         clearModal(state) {

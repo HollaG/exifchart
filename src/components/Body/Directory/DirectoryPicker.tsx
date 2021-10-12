@@ -8,6 +8,8 @@ import { setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
 import ImageDetails from "../../models/ImageDetails";
 
+
+
 const calculate35mmFocalLength = (tags: {
     FocalLengthIn35mmFormat: number;
     FocalLength: number;
@@ -83,6 +85,7 @@ const DirectoryPicker = () => {
     const dispatch = useDispatch();
 
     const showDirectoriesHandler = async () => {
+        
         try {
             const getFiles = async (
                 directory: FileSystemDirectoryHandle,
@@ -120,8 +123,6 @@ const DirectoryPicker = () => {
                                 { entry, thumbnail: "" },
                             ]);
                             // await set(pathToFile, entry);
-
-                            
 
                             // console.log(`-- Found directory: ${entry.name} --`);
 
@@ -286,7 +287,6 @@ const DirectoryPicker = () => {
             // Start recursive function
             const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
                 await getFiles(dirHandle, []);
-
 
             // Update the indexedDB
             dispatch(statusActions.setStatus("Updating IndexedDB..."));

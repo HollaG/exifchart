@@ -81,6 +81,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                     focalLength: image.focalLength,
                     iso: image.iso,
                 },
+                path
             })
         );
     };

@@ -16,7 +16,22 @@ import { filesActions } from "../../../store/files-slice";
 import { modalActions } from "../../../store/modal-slice";
 
 // const loadedDirectories: FileSystemDirectoryHandle[] = [];
-
+async function verifyPermission(fileHandle:FileSystemFileHandle, readWrite: boolean) {
+    const options: FileSystemHandlePermissionDescriptor = {};
+    if (readWrite) {
+      options.mode = 'readwrite';
+    }
+    // Check if permission was already granted. If so, return true.
+    if ((await fileHandle.queryPermission(options)) === 'granted') {
+      return true;
+    }
+    // Request permission. If the user grants permission, return true.
+    if ((await fileHandle.requestPermission(options)) === 'granted') {
+      return true;
+    }
+    // The user didn't grant permission, so return false.
+    return false;
+  }
 const imageCompressionOptions = {
     maxSizeMB: 0.5,
     maxWidthOrHeight: 720,
@@ -136,7 +151,9 @@ const Directory = () => {
                 // File handle found. Load as BLOB
                 // console.log("File handle found");
 
-                try {
+                try {                    
+                    let perm = await verifyPermission(idbFile.entry, false)
+                    if (!perm) return alert("You need to provide permission to view this image!")
                     let imageBlob = await idbFile.entry.getFile();
                     let compressedImage = await imageCompression(
                         imageBlob,
@@ -157,7 +174,8 @@ const Directory = () => {
                 } catch (e) {
                     console.log(
                         "Expected exception: fileHandle is a directory",
-                        e
+                        e,
+                        idbFile.entry
                     );
                 }
             }
@@ -169,38 +187,45 @@ const Directory = () => {
     const onBigViewHandler = async (path: string) => {
         // console.log(path) // Definitely exists in IDB
         // get the file reference
-        let idbFile:
-            | { entry: FileSystemFileHandle; thumbnail: string }
-            | undefined = await get(path);
 
-        if (!idbFile) return;
-        let imageBlob = await idbFile.entry.getFile();
-        let imageSrc = URL.createObjectURL(imageBlob);
+        try { 
 
-        let image = imageMap[path];
-        // let text = "";
-        // if (image) {
-        //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
-        //         image.lensModel || "unknown"
-        //     }. ${image.focalLength || "unknown"}mm | ${
-        //         image.aperture && `f/${image.aperture}`
-        //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
-        //         image.iso && image.iso
-        //     }`;
-        // }
-        dispatch(
-            modalActions.setModal({
-                src: imageSrc,
-                detailObject: {
-                    cameraModel: image.cameraModel,
-                    lensModel: image.lensModel,
-                    aperture: image.aperture,
-                    shutterSpeed: Number(image.shutterSpeed),
-                    focalLength: image.focalLength,
-                    iso: image.iso,
-                },
-            })
-        );
+            let idbFile:
+                | { entry: FileSystemFileHandle; thumbnail: string }
+                | undefined = await get(path);
+    
+            if (!idbFile) return;
+            let imageBlob = await idbFile.entry.getFile();
+            let imageSrc = URL.createObjectURL(imageBlob);
+    
+            let image = imageMap[path];
+            // let text = "";
+            // if (image) {
+            //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
+            //         image.lensModel || "unknown"
+            //     }. ${image.focalLength || "unknown"}mm | ${
+            //         image.aperture && `f/${image.aperture}`
+            //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
+            //         image.iso && image.iso
+            //     }`;
+            // }
+            dispatch(
+                modalActions.setModal({
+                    src: imageSrc,
+                    detailObject: {
+                        cameraModel: image.cameraModel,
+                        lensModel: image.lensModel,
+                        aperture: image.aperture,
+                        shutterSpeed: Number(image.shutterSpeed),
+                        focalLength: image.focalLength,
+                        iso: image.iso,
+                    },
+                    path
+                })
+            );
+        } catch (e) { 
+            console.log(e)
+        }
     };
 
     const scanningStatusText = useSelector(
