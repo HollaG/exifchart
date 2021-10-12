@@ -5,8 +5,8 @@ export interface ModalStructure {
     details: DetailObject;
     title: string,
     desc: string,
-    path: string
-
+    path: string,
+    index: number
 }
 
 interface DetailObject {
@@ -29,7 +29,8 @@ const initialState: ModalStructure = {
     },
     title: '',
     desc: '',
-    path: ''
+    path: '',
+    index: 0
 };
 
 const modalSlice = createSlice({
@@ -42,7 +43,8 @@ const modalSlice = createSlice({
                 src: string;
                 title?: string;
                 detailObject: DetailObject;
-                path: string
+                path: string,
+                index: number
             }>
         ) {
             state.src = action.payload.src;
@@ -80,7 +82,7 @@ const modalSlice = createSlice({
 
             state.desc = desc.join(" | ")
             state.path = action.payload.path
-
+            state.index = action.payload.index
         },
         clearModal(state) {
             state.src = ""

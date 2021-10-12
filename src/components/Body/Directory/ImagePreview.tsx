@@ -3,8 +3,9 @@ import React from "react";
 const ImagePreview: React.FC<{
     src: string;
     path: string;
-    onBigViewHandler: (path: string) => void;
-}> = ({ src, path, onBigViewHandler }) => {
+    index: number;
+    onBigViewHandler: (path: string, index: number) => void;
+}> = ({ src, path, onBigViewHandler, index }) => {
     return (
         <>
             <div
@@ -23,7 +24,7 @@ const ImagePreview: React.FC<{
                             className="w-full h-full object-cover"
                             src={src}
                             alt={`Preview for ${path}`}
-                            onClick={() => onBigViewHandler(path)}
+                            onClick={() => onBigViewHandler(path, index)}
                         />
                     </>
                 ) : (

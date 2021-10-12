@@ -1,10 +1,12 @@
+import { transform } from "@babel/core";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { modalActions } from "../../store/modal-slice";
+import DirectoryButton from "../../ui/DirectoryButton";
 
 
 
-const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string }> = ({ src,title, desc, path }) => {
+const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string, changePreviewHandler: (next: boolean, path: string) => void }> = ({ src,title, desc, path, changePreviewHandler }) => {
     const dispatch = useDispatch()
     const closeModalHandler = () => {
         dispatch(modalActions.clearModal())
@@ -35,6 +37,16 @@ const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: st
                     {desc}
                     <br/>
                     {path}
+                    
+                </div>
+                <div className="bg-gray-100 inline p-1 absolute rounded-lg border-4 border-gray-400 text-center" style={{             
+                    left: "50%",
+                    transform: "translate(-50%, 0px)",
+                    top: "1%"
+                }}> 
+                    
+                    <DirectoryButton extraClasses="mx-2" onClick={() => changePreviewHandler(false, path)}> Previous </DirectoryButton>
+                    <DirectoryButton extraClasses="mx-2" onClick={() => changePreviewHandler(true, path)}> Next </DirectoryButton>
                     
                 </div>
                 <img

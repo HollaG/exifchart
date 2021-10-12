@@ -14,24 +14,10 @@ import ContainerContents from "../../../ui/ContainerContents";
 import TableDataObject from "../../models/TableDataObject";
 import { filesActions } from "../../../store/files-slice";
 import { modalActions } from "../../../store/modal-slice";
+import verifyPermission from "../../../functions/verifyPermissions";
 
 // const loadedDirectories: FileSystemDirectoryHandle[] = [];
-async function verifyPermission(fileHandle:FileSystemFileHandle, readWrite: boolean) {
-    const options: FileSystemHandlePermissionDescriptor = {};
-    if (readWrite) {
-      options.mode = 'readwrite';
-    }
-    // Check if permission was already granted. If so, return true.
-    if ((await fileHandle.queryPermission(options)) === 'granted') {
-      return true;
-    }
-    // Request permission. If the user grants permission, return true.
-    if ((await fileHandle.requestPermission(options)) === 'granted') {
-      return true;
-    }
-    // The user didn't grant permission, so return false.
-    return false;
-  }
+
 const imageCompressionOptions = {
     maxSizeMB: 0.5,
     maxWidthOrHeight: 720,
@@ -62,7 +48,6 @@ const Directory = () => {
 
     const chartDataHandler = useCallback(() => {
         if (!checked.length || !allowChartReRender) return;
-
 
         let imageDataArray: ImageDetails[] = [];
         let tableDataArray: TableDataObject[] = [];
@@ -115,13 +100,21 @@ const Directory = () => {
         dispatch(chartsActions.generateChartData());
 
         dispatch(filesActions.setFilteredTableData(tableDataArray));
-    }, [checked, dispatch, folderList, imageMap, mapOfFolderOrFileIdToImage, allowChartReRender]);
+    }, [
+        checked,
+        dispatch,
+        folderList,
+        imageMap,
+        mapOfFolderOrFileIdToImage,
+        allowChartReRender,
+    ]);
 
     useEffect(chartDataHandler, [checked, chartDataHandler]);
 
     const [image, setImage] = useState({
         src: "",
         path: "",
+        index: 0
     });
 
     const onImageSelected = async (targetNodeId: string) => {
@@ -146,14 +139,18 @@ const Directory = () => {
                 setImage({
                     src: idbFile.thumbnail,
                     path: filePath,
+                    index: folderPathIndex
                 });
             } else {
                 // File handle found. Load as BLOB
                 // console.log("File handle found");
 
-                try {                    
-                    let perm = await verifyPermission(idbFile.entry, false)
-                    if (!perm) return alert("You need to provide permission to view this image!")
+                try {
+                    let perm = await verifyPermission(idbFile.entry, false);
+                    if (!perm)
+                        return alert(
+                            "You need to provide permission to view this image!"
+                        );
                     let imageBlob = await idbFile.entry.getFile();
                     let compressedImage = await imageCompression(
                         imageBlob,
@@ -170,6 +167,7 @@ const Directory = () => {
                     setImage({
                         src: imageSrc,
                         path: filePath,
+                        index: folderPathIndex
                     });
                 } catch (e) {
                     console.log(
@@ -184,20 +182,24 @@ const Directory = () => {
         }
     };
 
-    const onBigViewHandler = async (path: string) => {
+    const onBigViewHandler = async (path: string, index: number) => {
         // console.log(path) // Definitely exists in IDB
         // get the file reference
 
-        try { 
-
+        try {
             let idbFile:
                 | { entry: FileSystemFileHandle; thumbnail: string }
                 | undefined = await get(path);
-    
+
             if (!idbFile) return;
+            let perm = await verifyPermission(idbFile.entry, false);
+            if (!perm)
+                return alert(
+                    "You need to provide permission to view this image!"
+                );
             let imageBlob = await idbFile.entry.getFile();
             let imageSrc = URL.createObjectURL(imageBlob);
-    
+
             let image = imageMap[path];
             // let text = "";
             // if (image) {
@@ -220,11 +222,12 @@ const Directory = () => {
                         focalLength: image.focalLength,
                         iso: image.iso,
                     },
-                    path
+                    path,
+                    index
                 })
             );
-        } catch (e) { 
-            console.log(e)
+        } catch (e) {
+            console.log(e);
         }
     };
 
