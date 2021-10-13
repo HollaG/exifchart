@@ -15,7 +15,8 @@ import TableDataObject from "../../models/TableDataObject";
 import { filesActions } from "../../../store/files-slice";
 import { modalActions } from "../../../store/modal-slice";
 import verifyPermission from "../../../functions/verifyPermissions";
-
+import { supported } from "browser-fs-access";
+import useImage from "../../../hooks/useImage";
 // const loadedDirectories: FileSystemDirectoryHandle[] = [];
 
 const imageCompressionOptions = {
@@ -114,18 +115,20 @@ const Directory = () => {
     const [image, setImage] = useState({
         src: "",
         path: "",
-        index: 0
+        index: 0,
     });
 
     const onImageSelected = async (targetNodeId: string) => {
         // Goal: Get the filePath as it is a key in IndexedDB whose value is the FileHandle
+        console.log(targetNodeId);
         let folderPathIndex = mapOfFolderOrFileIdToImage[targetNodeId];
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
             if (!filePath) return console.log("Missing file path!");
             // Try to get the file handle from IndexedDB
+            console.log(filePath);
             let idbFile:
-                | { entry: FileSystemFileHandle; thumbnail: string }
+                | { entry: FileSystemFileHandle | File; thumbnail: string }
                 | undefined = await get(filePath);
 
             if (!idbFile)
@@ -139,9 +142,13 @@ const Directory = () => {
                 setImage({
                     src: idbFile.thumbnail,
                     path: filePath,
-                    index: folderPathIndex
+                    index: folderPathIndex,
                 });
-            } else {
+                return;
+            }
+            let imageBlob: File = new File([], "");
+            if ("getFile" in idbFile.entry) {
+                // Using File System Access API
                 // File handle found. Load as BLOB
                 // console.log("File handle found");
 
@@ -151,24 +158,7 @@ const Directory = () => {
                         return alert(
                             "You need to provide permission to view this image!"
                         );
-                    let imageBlob = await idbFile.entry.getFile();
-                    let compressedImage = await imageCompression(
-                        imageBlob,
-                        imageCompressionOptions
-                    );
-                    let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
-
-                    // Add thumbnail to the db
-                    await set(filePath, {
-                        entry: idbFile.entry,
-                        thumbnail: imageSrc,
-                    });
-
-                    setImage({
-                        src: imageSrc,
-                        path: filePath,
-                        index: folderPathIndex
-                    });
+                    imageBlob = await idbFile.entry.getFile();
                 } catch (e) {
                     console.log(
                         "Expected exception: fileHandle is a directory",
@@ -176,56 +166,89 @@ const Directory = () => {
                         idbFile.entry
                     );
                 }
+            } else {
+                imageBlob = idbFile.entry;
             }
+            let compressedImage = await imageCompression(
+                imageBlob,
+                imageCompressionOptions
+            );
+            let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
+            // Add thumbnail to the db
+            await set(filePath, {
+                entry: idbFile.entry,
+                thumbnail: imageSrc,
+            });
+
+            setImage({
+                src: imageSrc,
+                path: filePath,
+                index: folderPathIndex,
+            });
         } else {
             // console.log("no index!");
         }
     };
 
+
+    const [bigViewProps, setBigViewProps] = useState({
+        path: "",
+        index: 0
+    })
+    
+    useImage(bigViewProps.path, bigViewProps.index)
     const onBigViewHandler = async (path: string, index: number) => {
         // console.log(path) // Definitely exists in IDB
         // get the file reference
 
         try {
-            let idbFile:
-                | { entry: FileSystemFileHandle; thumbnail: string }
-                | undefined = await get(path);
+            // const returned = useImage(path, index);
+            return;
+            // let idbFile:
+            //     | { entry: FileSystemFileHandle | File; thumbnail: string }
+            //     | undefined = await get(path);
 
-            if (!idbFile) return;
-            let perm = await verifyPermission(idbFile.entry, false);
-            if (!perm)
-                return alert(
-                    "You need to provide permission to view this image!"
-                );
-            let imageBlob = await idbFile.entry.getFile();
-            let imageSrc = URL.createObjectURL(imageBlob);
-
-            let image = imageMap[path];
-            // let text = "";
-            // if (image) {
-            //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
-            //         image.lensModel || "unknown"
-            //     }. ${image.focalLength || "unknown"}mm | ${
-            //         image.aperture && `f/${image.aperture}`
-            //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
-            //         image.iso && image.iso
-            //     }`;
+            // let imageBlob: File;
+            // if (!idbFile) return;
+            // if ("getFile" in idbFile.entry) {
+            //     let perm = await verifyPermission(idbFile.entry, false);
+            //     if (!perm)
+            //         return alert(
+            //             "You need to provide permission to view this image!"
+            //         );
+            //     imageBlob = await idbFile.entry.getFile();
+            // } else {
+            //     imageBlob = idbFile.entry;
             // }
-            dispatch(
-                modalActions.setModal({
-                    src: imageSrc,
-                    detailObject: {
-                        cameraModel: image.cameraModel,
-                        lensModel: image.lensModel,
-                        aperture: image.aperture,
-                        shutterSpeed: Number(image.shutterSpeed),
-                        focalLength: image.focalLength,
-                        iso: image.iso,
-                    },
-                    path,
-                    index
-                })
-            );
+
+            // let imageSrc = URL.createObjectURL(imageBlob);
+
+            // let image = imageMap[path];
+            // // let text = "";
+            // // if (image) {
+            // //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
+            // //         image.lensModel || "unknown"
+            // //     }. ${image.focalLength || "unknown"}mm | ${
+            // //         image.aperture && `f/${image.aperture}`
+            // //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
+            // //         image.iso && image.iso
+            // //     }`;
+            // // }
+            // dispatch(
+            //     modalActions.setModal({
+            //         src: imageSrc,
+            //         detailObject: {
+            //             cameraModel: image.cameraModel,
+            //             lensModel: image.lensModel,
+            //             aperture: image.aperture,
+            //             shutterSpeed: Number(image.shutterSpeed),
+            //             focalLength: image.focalLength,
+            //             iso: image.iso,
+            //         },
+            //         path,
+            //         index,
+            //     })
+            // );
         } catch (e) {
             console.log(e);
         }
@@ -276,7 +299,7 @@ const Directory = () => {
                     />
                 </div>
             </ContainerContents>
-            <ImagePreview {...image} onBigViewHandler={onBigViewHandler} />
+            <ImagePreview {...image} onBigViewHandler={setBigViewProps} />
         </Container>
     );
 

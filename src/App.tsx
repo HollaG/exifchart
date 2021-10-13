@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar/Navbar";
 import firstLoad from "./config/first_load";
 import verifyPermission from "./functions/verifyPermissions";
 import { modalActions } from "./store/modal-slice";
+import { supported } from "browser-fs-access";
 
 function App() {
     useEffect(firstLoad, [firstLoad]);
@@ -21,43 +22,53 @@ function App() {
 
     const changePreviewHandler = async (
         next: boolean,
-        path: string,
         specifiedIndex?: number
     ) => {
-        let index = specifiedIndex || modal.index;
+        let index = typeof specifiedIndex !== 'undefined' ? specifiedIndex : modal.index;
         let newIndex: number;
 
         if (next) {
             newIndex = index + 1;
-            if (newIndex === folderList.length) newIndex = 0
-            
+            if (newIndex === folderList.length) newIndex = 0;
         } else {
             newIndex = index - 1;
-            if (newIndex <= 0) newIndex = folderList.length - 1;
+            if (newIndex < 0) newIndex = folderList.length - 1;
         }
-
         // get the filepath of the new index
         const newFilePath = folderList[newIndex];
+        console.log({newIndex, newFilePath})
 
-        let idbFile:
-            | { entry: FileSystemFileHandle; thumbnail: string }
-            | undefined = await get(newFilePath);
+        let imageBlob: File;
 
-        if (!idbFile) return;
-        console.log(idbFile.entry);
-        if (idbFile.entry.kind !== "file") {
-            console.log("Calling change preview handler,", {
-                next,
-                newFilePath,
-            });
-            changePreviewHandler(next, newFilePath, newIndex); // Skip the directory
-            return;
+        if (supported) {
+            let idbFile: { entry: File; thumbnail: string } | undefined =
+                await get(newFilePath);
+            console.log(idbFile )
+            if (!idbFile) {
+                changePreviewHandler(next, newIndex); // Skip the directory
+                return;
+            } else {
+                imageBlob = idbFile.entry;
+            }
+        } else {
+            let idbFile:
+                | { entry: FileSystemFileHandle; thumbnail: string }
+                | undefined = await get(newFilePath);
+            if (!idbFile) return alert("Unknown error occured!");
+
+            if (idbFile.entry.kind !== "file") {
+                changePreviewHandler(next, newIndex); // Skip the directory
+                return;
+            }
+
+            let perm = await verifyPermission(idbFile.entry, false);
+            if (!perm)
+                return alert(
+                    "You need to provide permission to view this image!"
+                );
+            imageBlob = await idbFile.entry.getFile();
         }
 
-        let perm = await verifyPermission(idbFile.entry, false);
-        if (!perm)
-            return alert("You need to provide permission to view this image!");
-        let imageBlob = await idbFile.entry.getFile();
         let imageSrc = URL.createObjectURL(imageBlob);
 
         let image = imageMap[newFilePath];

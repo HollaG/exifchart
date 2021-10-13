@@ -1,10 +1,14 @@
 import React from "react";
 
+interface handler { 
+    path: string,
+    index: number
+}
 const ImagePreview: React.FC<{
     src: string;
     path: string;
     index: number;
-    onBigViewHandler: (path: string, index: number) => void;
+    onBigViewHandler: (props: handler) => void;
 }> = ({ src, path, onBigViewHandler, index }) => {
     return (
         <>
@@ -24,7 +28,7 @@ const ImagePreview: React.FC<{
                             className="w-full h-full object-cover"
                             src={src}
                             alt={`Preview for ${path}`}
-                            onClick={() => onBigViewHandler(path, index)}
+                            onClick={() => onBigViewHandler({path, index})}
                         />
                     </>
                 ) : (

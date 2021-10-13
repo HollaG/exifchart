@@ -7,8 +7,7 @@ import DirectoryButton from "../../../ui/DirectoryButton";
 import { setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
 import ImageDetails from "../../models/ImageDetails";
-
-
+import { supported, directoryOpen, fileOpen } from "browser-fs-access";
 
 const calculate35mmFocalLength = (tags: {
     FocalLengthIn35mmFormat: number;
@@ -85,7 +84,6 @@ const DirectoryPicker = () => {
     const dispatch = useDispatch();
 
     const showDirectoriesHandler = async () => {
-        
         try {
             const getFiles = async (
                 directory: FileSystemDirectoryHandle,
@@ -198,10 +196,7 @@ const DirectoryPicker = () => {
                                 let filePath =
                                     currentDirectoryPathArray.join("/");
 
-                                let fullPathToFile = filePath
-                                    ? `${filePath}/${file.name}`
-                                    : file.name;
-                                filesToAdd[fullPathToFile] = {
+                                filesToAdd[pathToFile] = {
                                     name: entry.name,
                                     path: filePath,
                                     aperture: fileData.FNumber,
@@ -218,26 +213,7 @@ const DirectoryPicker = () => {
                                     cameraModel: fileData.Model,
                                     whiteBalance: fileData.WhiteBalance,
                                 };
-                                // dispatch(
-                                //     filesActions.addFile({
-                                //         name: entry.name,
-                                //         path: filePath,
-                                //         aperture: fileData.FNumber,
-                                //         focalLength:
-                                //             calculate35mmFocalLength(fileData),
-                                //         iso: fileData.ISO,
-                                //         shutterSpeed:
-                                //             Math.round(
-                                //                 10 / fileData.ExposureTime
-                                //             ) / 10,
-                                //         exposureCompensation:
-                                //             fileData.ExposureCompensation,
-                                //         exposureMode: fileData.ExposureProgram,
-                                //         lensModel: fileData.LensModel,
-                                //         cameraModel: fileData.Model,
-                                //         whiteBalance: fileData.WhiteBalance,
-                                //     })
-                                // );
+                                
 
                                 directoriesToAdd.push(
                                     [
@@ -276,39 +252,129 @@ const DirectoryPicker = () => {
 
                 return { directoriesToAdd, filesToAdd, indexedDBtoAdd };
             };
+            const getFallbackFiles = async (
+                files: File[],
+                currentDirectoryPathArray: String[]
+            ): Promise<{
+                directoriesToAdd: string[];
+                filesToAdd: { [key: string]: ImageDetails };
+                indexedDBtoAdd: [string, { entry: File; thumbnail: string }][];
+            }> => {
+                let directoriesToAdd: string[] = [];
+                let filesToAdd: { [key: string]: ImageDetails } = {};
+                let indexedDBtoAdd: [
+                    string,
+                    { entry: File; thumbnail: string }
+                ][] = [];
 
-            // Request permission from user to scan the directories
-            const dirHandle = await window.showDirectoryPicker();
-            let timeStart = performance.now();
+                let alreadyAddedDirectories: {[key:string]: boolean} = {}
+                for await (const file of files) {
+                    // @ts-ignore
+                    let directParent = file.directoryHandle.name;
+                    let fullPathToFile = `${directParent}/${file.name}`;
 
-            // Set status
-            dispatch(statusActions.setStatus("Starting scan..."));
+                    // Because of the way the iterator works in the case where File System Accses API is supported,
+                    // every time we encounter a new directory, we need to add it to the directoriesToAdd array.
+                    // *Only if it hasn't been added already
+                    // For example: ['new_directory', 'new_directory/image_1.jpg', 'new_directory/image_2.jpg", "second_dir", "second_dir/image_3.jpg"]
+                    if (!alreadyAddedDirectories[directParent]) {
+                        alreadyAddedDirectories[directParent] = true
+                        directoriesToAdd.push(directParent)
+                    }
+                    directoriesToAdd.push(fullPathToFile);
+                    const fileData = await exifr.parse(
+                        file,
+                        // CONSTANTS.EXIF_TAGS
+                        {
+                            iptc: true,
+                        }
+                    );
 
-            // Start recursive function
-            const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
-                await getFiles(dirHandle, []);
+                    // Push the item into the Redux store
+                    let filePath = currentDirectoryPathArray.join("/");
 
-            // Update the indexedDB
-            dispatch(statusActions.setStatus("Updating IndexedDB..."));
-            await setMany(indexedDBtoAdd);
-            dispatch(statusActions.setStatus("Completed updating IndexedDB"));
+                    filesToAdd[fullPathToFile] = {
+                        name: file.name,
+                        path: directParent,
+                        aperture: fileData.FNumber,
+                        focalLength: calculate35mmFocalLength(fileData),
+                        iso: fileData.ISO,
+                        shutterSpeed:
+                            Math.round(10 / fileData.ExposureTime) / 10,
+                        exposureCompensation: fileData.ExposureCompensation,
+                        exposureMode: fileData.ExposureProgram,
+                        lensModel: fileData.LensModel,
+                        cameraModel: fileData.Model,
+                        whiteBalance: fileData.WhiteBalance,
+                    };
 
-            // Update the states with the new values (directoriesToAdd, filesToAdd)
-            dispatch(directoriesActions.setDirectories(directoriesToAdd));
-            dispatch(filesActions.setFiles(filesToAdd));
+                    indexedDBtoAdd.push([
+                        fullPathToFile,
+                        { entry: file, thumbnail: "" },
+                    ]);
+                }
+                return {
+                    directoriesToAdd,
+                    filesToAdd,
+                    indexedDBtoAdd,
+                };
+            };
 
-            // Set status and construct directory tree
-            // dispatch(statusActions.setStatus("Constructing directory tree..."));
-            // dispatch(statusActions.setNextAction("dirtree"));
-            dispatch(directoriesActions.constructTree());
+            // const blobsInDirectory = await directoryOpen({
+            //     recursive: true,
+            // });
+            // console.log(blobsInDirectory);
 
-            let timeTaken =
-                Math.round(((performance.now() - timeStart) / 1000) * 100) /
-                100;
-            dispatch(
-                statusActions.setStatus(`Completed! (${timeTaken} seconds)`)
-            );
-            setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
+            if (supported) {
+                const blobsInDirectory = await directoryOpen({
+                    recursive: true,
+                });
+                console.log(blobsInDirectory);
+                const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
+                    await getFallbackFiles(blobsInDirectory, []);
+                console.log({ directoriesToAdd, filesToAdd, indexedDBtoAdd });
+                console.log("setting indexedDB");
+                await setMany(indexedDBtoAdd);
+                // Update the states with the new values (directoriesToAdd, filesToAdd)
+                dispatch(directoriesActions.setDirectories(directoriesToAdd));
+                dispatch(filesActions.setFiles(filesToAdd));
+                dispatch(directoriesActions.constructTree());
+            } else {
+                // Request permission from user to scan the directories
+                const dirHandle = await window.showDirectoryPicker();
+                let timeStart = performance.now();
+
+                // Set status
+                dispatch(statusActions.setStatus("Starting scan..."));
+
+                // Start recursive function
+                const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
+                    await getFiles(dirHandle, []);
+
+                // Update the indexedDB
+                dispatch(statusActions.setStatus("Updating IndexedDB..."));
+                await setMany(indexedDBtoAdd);
+                dispatch(
+                    statusActions.setStatus("Completed updating IndexedDB")
+                );
+
+                // Update the states with the new values (directoriesToAdd, filesToAdd)
+                dispatch(directoriesActions.setDirectories(directoriesToAdd));
+                dispatch(filesActions.setFiles(filesToAdd));
+
+                // Set status and construct directory tree
+                // dispatch(statusActions.setStatus("Constructing directory tree..."));
+                // dispatch(statusActions.setNextAction("dirtree"));
+                dispatch(directoriesActions.constructTree());
+
+                let timeTaken =
+                    Math.round(((performance.now() - timeStart) / 1000) * 100) /
+                    100;
+                dispatch(
+                    statusActions.setStatus(`Completed! (${timeTaken} seconds)`)
+                );
+                setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
+            }
         } catch (e) {
             console.log(e);
         }

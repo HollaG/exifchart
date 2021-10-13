@@ -1,12 +1,7 @@
 import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import RootState from "../../models/RootState";
-import {
-    Cell,
-    usePagination,
-    useSortBy,
-    useTable,
-} from "react-table";
+import { Cell, usePagination, useSortBy, useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DirectoryButton from "../../../ui/DirectoryButton";
@@ -15,17 +10,17 @@ import { columns } from "../../../config/table_config";
 import useWindowDimensions from "../../../hooks/use-window-dimensions";
 import { get } from "idb-keyval";
 import { modalActions } from "../../../store/modal-slice";
-
+import verifyPermission from "../../../functions/verifyPermissions";
 
 const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
-    const { height } = useWindowDimensions();    
-    const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1;   
+    const { height } = useWindowDimensions();
+    const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1;
 
     const rawData: TableDataObject[] = useSelector(
         (state: RootState) => state.files.tableData
     );
     const data = useMemo(() => rawData, [rawData]);
-    
+
     // See https://github.com/tannerlinsley/react-table/discussions/2848 for disableSortRemove
     const tableInstance = useTable<TableDataObject>(
         {
@@ -53,7 +48,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         pageCount,
         gotoPage,
         nextPage,
-        previousPage,        
+        previousPage,
         state: { pageIndex },
     } = tableInstance;
 
@@ -62,17 +57,28 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
     const viewImageHandler = async (cell: Cell<TableDataObject>) => {
         let path = cell.row.original.path;
         let idbFile:
-            | { entry: FileSystemFileHandle; thumbnail: string }
+            | { entry: FileSystemFileHandle | File; thumbnail: string }
             | undefined = await get(path);
 
+        let imageBlob: File;
         if (!idbFile) return;
-        let imageBlob = await idbFile.entry.getFile();
+        if ("getFile" in idbFile.entry) {
+            let perm = await verifyPermission(idbFile.entry, false);
+            if (!perm)
+                return alert(
+                    "You need to provide permission to view this image!"
+                );
+            imageBlob = await idbFile.entry.getFile();
+        } else {
+            imageBlob = idbFile.entry;
+        }
+
         let imageSrc = URL.createObjectURL(imageBlob);
 
-        let image = imageMap[path];        
+        let image = imageMap[path];
         dispatch(
             modalActions.setModal({
-                src: imageSrc,                
+                src: imageSrc,
                 detailObject: {
                     cameraModel: image.cameraModel,
                     lensModel: image.lensModel,
@@ -82,7 +88,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                     iso: image.iso,
                 },
                 path,
-                index: cell.row.original.id
+                index: cell.row.original.id,
             })
         );
     };
@@ -225,7 +231,6 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
             </table>
         </div>
     );
-    
 });
 
 export default TableViewer;
