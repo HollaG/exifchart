@@ -1,8 +1,7 @@
 import { ModalStructure } from "../../store/modal-slice";
 import ChartData from "./ChartData";
-import DirectoryStructure, { resultInterface } from "./Directory";
+import DirectoryStructure from "./Directory";
 import FilesStructure from "./Files";
-import ImageDetails from "./ImageDetails";
 import Status from "./Status";
 
 export default interface RootState {

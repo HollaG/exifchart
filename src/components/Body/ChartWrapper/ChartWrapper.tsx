@@ -15,7 +15,6 @@ const ChartWrapper = () => {
     const chartRef = React.createRef<ChartItem>();
 
     const saveChartAsImage = () => {
-        // console.log("Downloading...");
         if (chartRef && chartRef.current) {
             const canvas = chartRef.current.canvas;
             canvas.toBlob(function(blob: Blob) {

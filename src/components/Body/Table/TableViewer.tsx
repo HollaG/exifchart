@@ -1,19 +1,16 @@
-import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import  { useMemo } from "react";
+import { useSelector } from "react-redux";
 import RootState from "../../models/RootState";
-import { Cell, usePagination, useSortBy, useTable } from "react-table";
+import { usePagination, useSortBy, useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DirectoryButton from "../../../ui/DirectoryButton";
 import TableDataObject from "../../models/TableDataObject";
 import { columns } from "../../../config/table_config";
 import useWindowDimensions from "../../../hooks/use-window-dimensions";
-import { get } from "idb-keyval";
-import { modalActions } from "../../../store/modal-slice";
-import verifyPermission from "../../../functions/verifyPermissions";
-import useImage from "../../../hooks/useImage";
+import useImage from "../../../hooks/use-image";
 
-const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
+const TableViewer = () => {
     const { height } = useWindowDimensions();
     const numberOfRowsShowing = Math.floor(height / 90 - 2) || 1;
 
@@ -53,16 +50,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         state: { pageIndex },
     } = tableInstance;
 
-
-    const [bigViewProps, setBigViewProps] = useState({
-        path: "",
-        index: 0,
-        refresh: 0,
-    });
-
     const { setCurrentBigImage } = useImage();
-
-
 
     return (
         <div style={{ maxHeight: "85vh" }}>
@@ -117,7 +105,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                     ))}
                 </select> */}
             </div>
-            <table ref={ref} {...getTableProps()} className="w-full">
+            <table {...getTableProps()} className="w-full">
                 <thead>
                     {headerGroups.map((headerGroup) => (
                         <tr {...headerGroup.getHeaderGroupProps()}>
@@ -170,27 +158,13 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                                                 {
                                                     <DirectoryButton
                                                         onClick={() =>
-                                                            // setBigViewProps(
-                                                            //     (prevState) => {
-                                                            //         return {
-                                                            //             path: cell
-                                                            //                 .row
-                                                            //                 .original
-                                                            //                 .path,
-                                                            //             index: cell
-                                                            //                 .row
-                                                            //                 .original
-                                                            //                 .id,
-                                                            //             refresh: prevState.refresh + 1
-                                                            //         };
-                                                            //     }
-                                                            // )
                                                             setCurrentBigImage(
                                                                 cell.row
                                                                     .original
                                                                     .path,
                                                                 cell.row
-                                                                    .original.index
+                                                                    .original
+                                                                    .index
                                                             )
                                                         }
                                                     >
@@ -221,6 +195,6 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
             </table>
         </div>
     );
-});
+};
 
 export default TableViewer;

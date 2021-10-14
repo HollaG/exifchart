@@ -6,24 +6,13 @@ import DirectoryViewer from "./DirectoryViewer";
 import ImageDetails from "../../models/ImageDetails";
 import { chartsActions } from "../../../store/charts-slice";
 import ImagePreview from "./ImagePreview";
-import { get, set } from "idb-keyval";
-import imageCompression from "browser-image-compression";
+import { get } from "idb-keyval";
 import Container from "../../../ui/Container";
 import ContainerHeader from "../../../ui/ContainerHeader";
 import ContainerContents from "../../../ui/ContainerContents";
 import TableDataObject from "../../models/TableDataObject";
 import { filesActions } from "../../../store/files-slice";
-import { modalActions } from "../../../store/modal-slice";
-import verifyPermission from "../../../functions/verifyPermissions";
-import { supported } from "browser-fs-access";
-import useImage from "../../../hooks/useImage";
-// const loadedDirectories: FileSystemDirectoryHandle[] = [];
-
-const imageCompressionOptions = {
-    maxSizeMB: 0.5,
-    maxWidthOrHeight: 720,
-    useWebWorker: true,
-};
+import useImage from "../../../hooks/use-image";
 
 const Directory = () => {
     const [checked, setChecked] = useState<string[]>([]);
@@ -32,9 +21,6 @@ const Directory = () => {
 
     const dispatch = useDispatch();
 
-    // const onAddDirHandle = async (dirHandle: FileSystemDirectoryHandle) => {
-    //     loadedDirectories.push(dirHandle);
-    // };
     const mapOfFolderOrFileIdToImage = useSelector(
         (state: RootState) => state.directories.mapFolderOrFileIdToImage
     );
@@ -42,6 +28,7 @@ const Directory = () => {
         (state: RootState) => state.directories.folderList
     );
     const imageMap = useSelector((state: RootState) => state.files.files);
+
     // allowChartReRenders = false // re-set to zero once component rerenderes due to useSelector changing
     useEffect(() => {
         setAllowChartReRender(false);
@@ -125,61 +112,14 @@ const Directory = () => {
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
             if (!filePath) return console.log("Missing file path!");
-            // Try to get the file handle from IndexedDB
+            // Try to get the file blob from IndexedDB
             console.log(filePath);
-            let idbFile:
-                | string
-                | undefined = await get(filePath);
+            let idbFile: string | undefined = await get(filePath);
 
             if (!idbFile)
                 return console.log(
                     "No file handle found - error occured somewhere?"
                 );
-
-            // if (idbFile.thumbnail) {
-            //     // Previously loaded into DB
-            //     // console.log("File string found");
-            //     setImage({
-            //         src: idbFile.thumbnail,
-            //         path: filePath,
-            //         index: folderPathIndex,
-            //     });
-            //     return;
-            // }
-            // let imageBlob: File = new File([idbFile.entry], "");
-            // if ("getFile" in idbFile.entry) {
-            //     // Using File System Access API
-            //     // File handle found. Load as BLOB
-            //     // console.log("File handle found");
-
-            //     try {
-            //         let perm = await verifyPermission(idbFile.entry, false);
-            //         if (!perm)
-            //             return alert(
-            //                 "You need to provide permission to view this image!"
-            //             );
-            //         imageBlob = await idbFile.entry.getFile();
-            //     } catch (e) {
-            //         console.log(
-            //             "Expected exception: fileHandle is a directory",
-            //             e,
-            //             idbFile.entry
-            //         );
-            //     }
-            // } else {
-            //     imageBlob = idbFile.entry;
-            // }
-            // let compressedImage = await imageCompression(
-            //     imageBlob,
-            //     imageCompressionOptions
-            // );
-            // let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
-            // Add thumbnail to the db
-            // await set(filePath, {
-            //     entry: idbFile.entry,
-            //     thumbnail: idbFile.entry,
-            // });
-
             setImage({
                 src: idbFile,
                 path: filePath,
@@ -190,66 +130,7 @@ const Directory = () => {
         }
     };
 
-    // useImage(bigViewProps.path, bigViewProps.index, bigViewProps.refresh)
-
-    const {setCurrentBigImage } = useImage();
-
-    const onBigViewHandler = async (path: string, index: number) => {
-        // console.log(path) // Definitely exists in IDB
-        // get the file reference
-
-        try {
-            // const returned = useImage(path, index);
-            return;
-            // let idbFile:
-            //     | { entry: FileSystemFileHandle | File; thumbnail: string }
-            //     | undefined = await get(path);
-
-            // let imageBlob: File;
-            // if (!idbFile) return;
-            // if ("getFile" in idbFile.entry) {
-            //     let perm = await verifyPermission(idbFile.entry, false);
-            //     if (!perm)
-            //         return alert(
-            //             "You need to provide permission to view this image!"
-            //         );
-            //     imageBlob = await idbFile.entry.getFile();
-            // } else {
-            //     imageBlob = idbFile.entry;
-            // }
-
-            // let imageSrc = URL.createObjectURL(imageBlob);
-
-            // let image = imageMap[path];
-            // // let text = "";
-            // // if (image) {
-            // //     text = `Shot on ${image.cameraModel || "unknown"} w/ ${
-            // //         image.lensModel || "unknown"
-            // //     }. ${image.focalLength || "unknown"}mm | ${
-            // //         image.aperture && `f/${image.aperture}`
-            // //     } | ${image.shutterSpeed && image.shutterSpeed} | ISO ${
-            // //         image.iso && image.iso
-            // //     }`;
-            // // }
-            // dispatch(
-            //     modalActions.setModal({
-            //         src: imageSrc,
-            //         detailObject: {
-            //             cameraModel: image.cameraModel,
-            //             lensModel: image.lensModel,
-            //             aperture: image.aperture,
-            //             shutterSpeed: Number(image.shutterSpeed),
-            //             focalLength: image.focalLength,
-            //             iso: image.iso,
-            //         },
-            //         path,
-            //         index,
-            //     })
-            // );
-        } catch (e) {
-            console.log(e);
-        }
-    };
+    const { setCurrentBigImage } = useImage();
 
     const scanningStatusText = useSelector(
         (state: RootState) => state.status.text

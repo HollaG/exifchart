@@ -1,9 +1,5 @@
 import React from "react";
 
-interface handler {
-    path: string;
-    index: number;
-}
 const ImagePreview: React.FC<{
     src: string;
     path: string;
@@ -13,7 +9,7 @@ const ImagePreview: React.FC<{
     return (
         <>
             <div
-                className="image-preview border-gray-100 border-t-0 rounded-b border-4 flex items-center justify-center relative  cursor-pointer"
+                className="image-preview border-gray-100 border-t-0 rounded-b border-4 flex items-center justify-center relative"
                 style={{ height: "260px" }}
             >
                 {src ? (
@@ -25,7 +21,7 @@ const ImagePreview: React.FC<{
                             {path}
                         </p>
                         <img
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover cursor-pointer"
                             src={src}
                             alt={`Preview for ${path}`}
                             onClick={() => setCurrentBigImage(path, index)}

@@ -26,21 +26,6 @@ const filesSlice = createSlice({
                 : file.name;
 
             state.files[pathToFile] = file;
-
-            // state.tableData.push({
-            //     id: state.tableData.length,
-            //     filePath: pathToFile,
-            //     image: "Load",
-            //     cameraModel: file.cameraModel,
-            //     lensModel: file.lensModel,
-            //     focalLength: file.focalLength,
-            //     shutterSpeed: file.shutterSpeed,
-            //     aperture: file.aperture,
-            //     iso: file.iso,
-            //     exposureMode: file.exposureMode,
-            //     exposureComp: file.exposureCompensation,
-            //     whiteBalance: file.whiteBalance,
-            // });
         },
         setFiles: (
             state,

@@ -24,14 +24,13 @@ const directoriesSlice = createSlice({
         setDirectories: (state, action: PayloadAction<string[]>) => {
             // console.log("DirectoriesSlice reducer: setDirectories");
 
-            state.folderList.push(...action.payload)
+            state.folderList.push(...action.payload);
         },
         setBeginConstructing(state) {
             state.constructing = true;
         },
         constructTree(state) {
             // console.log("DirectoriesSlice reducer: constructTree");
-
 
             const directories = state.folderList;
 
@@ -54,16 +53,12 @@ const directoriesSlice = createSlice({
             if (state.rootFolder.length) {
                 state.rootFolder.forEach((tree) => {
                     // Get the total number of children of this tree
-                    // However, note that the root tree itself should also be added to the iterator     
-                    // This is because the root is also counted in folderList         
+                    // However, note that the root tree itself should also be added to the iterator
+                    // This is because the root is also counted in folderList
                     getChildren(tree.children);
-                    indexToStartIterating++
-
-                    
-                    
+                    indexToStartIterating++;
                 });
             }
-
 
             for (let i = indexToStartIterating; i < directories.length; i++) {
                 let path = directories[i];
@@ -87,16 +82,8 @@ const directoriesSlice = createSlice({
                 }, level);
             }
 
-            // console.log("Completed directory tree construction");
-            // state.rootFolder.push({
-            //     value: state.rootFolder.length.toString(),
-            //     label: `Import ${state.rootFolder.length + 1}`,
-            //     children: result,
-            // });
-            state.rootFolder.push(...result)
+            state.rootFolder.push(...result);
             state.constructing = false;
-
-            // state.rootFolder = result
         },
     },
 });

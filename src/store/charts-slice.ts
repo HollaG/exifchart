@@ -18,7 +18,6 @@ const initialState: {
 
 const ROUNDING_FACTOR = 10;
 
-
 const rainbow = (numOfSteps: number, step: number) => {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
     // Adam Cole, 2011-Sept-14
@@ -504,50 +503,6 @@ const chartsSlice = createSlice({
                 datasets: datasetsIso,
             };
 
-
-
-           
-            // const aperturesFound: { [key: number]: 1 } = {};
-
-            /*
-                    Sample object for apertures below
-
-                    {
-                        2.8: 10,
-                        5.6: 2
-                    }
-
-                */
-
-            // images.forEach((image) => {
-            //     if (image.aperture) {
-            //         if (!aperturesFound[image.aperture])
-            //             aperturesFound[image.aperture] = 1;
-            //         else aperturesFound[image.aperture]++;
-            //     }
-            // });
-            // console.log({ aperturesFound });
-
-            // const apertureArray: string[] = Object.keys(aperturesFound); // Remember! Strings from Object.keys
-            // apertureArray.sort((a, b) => Number(a) - Number(b));
-
-            // const labels: string[] = [];
-            // const dataset: number[] = [];
-            // apertureArray.forEach((aperture) => {
-            //     labels.push(aperture);
-            //     dataset.push(aperturesFound[Number(aperture)]);
-            // });
-
-            // const datasets: DataSet[] = [
-            //     {
-            //         label: "Aperture",
-            //         data: dataset,
-            //     },
-            // ];
-            // state.aperture = {
-            //     labels,
-            //     datasets,
-            // };
         },
     },
 });

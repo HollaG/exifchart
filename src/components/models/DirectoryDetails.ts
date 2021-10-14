@@ -1,5 +1,4 @@
-export default interface DirectoryDetails { 
-    
-    path: string,    
-    hasFiles?: boolean
+export default interface DirectoryDetails {
+    path: string;
+    hasFiles?: boolean;
 }

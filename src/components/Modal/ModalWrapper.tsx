@@ -1,10 +1,7 @@
-import { transform } from "@babel/core";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { modalActions } from "../../store/modal-slice";
 import DirectoryButton from "../../ui/DirectoryButton";
-
-
 
 const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string, changeCurrentBigImage: (next: boolean) => void }> = ({ src,title, desc, path, changeCurrentBigImage }) => {
     const dispatch = useDispatch()
