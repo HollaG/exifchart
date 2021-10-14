@@ -128,7 +128,7 @@ const Directory = () => {
             // Try to get the file handle from IndexedDB
             console.log(filePath);
             let idbFile:
-                | { entry: FileSystemFileHandle | File; thumbnail: string }
+                | { entry: string; thumbnail: string }
                 | undefined = await get(filePath);
 
             if (!idbFile)
@@ -146,42 +146,42 @@ const Directory = () => {
                 });
                 return;
             }
-            let imageBlob: File = new File([], "");
-            if ("getFile" in idbFile.entry) {
-                // Using File System Access API
-                // File handle found. Load as BLOB
-                // console.log("File handle found");
+            let imageBlob: File = new File([idbFile.entry], "");
+            // if ("getFile" in idbFile.entry) {
+            //     // Using File System Access API
+            //     // File handle found. Load as BLOB
+            //     // console.log("File handle found");
 
-                try {
-                    let perm = await verifyPermission(idbFile.entry, false);
-                    if (!perm)
-                        return alert(
-                            "You need to provide permission to view this image!"
-                        );
-                    imageBlob = await idbFile.entry.getFile();
-                } catch (e) {
-                    console.log(
-                        "Expected exception: fileHandle is a directory",
-                        e,
-                        idbFile.entry
-                    );
-                }
-            } else {
-                imageBlob = idbFile.entry;
-            }
-            let compressedImage = await imageCompression(
-                imageBlob,
-                imageCompressionOptions
-            );
-            let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
+            //     try {
+            //         let perm = await verifyPermission(idbFile.entry, false);
+            //         if (!perm)
+            //             return alert(
+            //                 "You need to provide permission to view this image!"
+            //             );
+            //         imageBlob = await idbFile.entry.getFile();
+            //     } catch (e) {
+            //         console.log(
+            //             "Expected exception: fileHandle is a directory",
+            //             e,
+            //             idbFile.entry
+            //         );
+            //     }
+            // } else {
+            //     imageBlob = idbFile.entry;
+            // }
+            // let compressedImage = await imageCompression(
+            //     imageBlob,
+            //     imageCompressionOptions
+            // );
+            // let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
             // Add thumbnail to the db
             await set(filePath, {
                 entry: idbFile.entry,
-                thumbnail: imageSrc,
+                thumbnail: idbFile.entry,
             });
 
             setImage({
-                src: imageSrc,
+                src: idbFile.entry,
                 path: filePath,
                 index: folderPathIndex,
             });
@@ -190,13 +190,15 @@ const Directory = () => {
         }
     };
 
-
     const [bigViewProps, setBigViewProps] = useState({
         path: "",
-        index: 0
-    })
-    
-    useImage(bigViewProps.path, bigViewProps.index)
+        index: 0,
+    });
+
+    // useImage(bigViewProps.path, bigViewProps.index, bigViewProps.refresh)
+
+    const {setCurrentBigImage } = useImage();
+
     const onBigViewHandler = async (path: string, index: number) => {
         // console.log(path) // Definitely exists in IDB
         // get the file reference
@@ -299,7 +301,7 @@ const Directory = () => {
                     />
                 </div>
             </ContainerContents>
-            <ImagePreview {...image} onBigViewHandler={setBigViewProps} />
+            <ImagePreview {...image} setCurrentBigImage={setCurrentBigImage} />
         </Container>
     );
 

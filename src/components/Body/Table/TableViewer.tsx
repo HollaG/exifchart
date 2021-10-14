@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import RootState from "../../models/RootState";
 import { Cell, usePagination, useSortBy, useTable } from "react-table";
@@ -11,6 +11,7 @@ import useWindowDimensions from "../../../hooks/use-window-dimensions";
 import { get } from "idb-keyval";
 import { modalActions } from "../../../store/modal-slice";
 import verifyPermission from "../../../functions/verifyPermissions";
+import useImage from "../../../hooks/useImage";
 
 const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
     const { height } = useWindowDimensions();
@@ -54,6 +55,15 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
 
     const imageMap = useSelector((state: RootState) => state.files.files);
     const dispatch = useDispatch();
+
+    const [bigViewProps, setBigViewProps] = useState({
+        path: "",
+        index: 0,
+        refresh: 0,
+    });
+
+    const { setCurrentBigImage } = useImage();
+
     const viewImageHandler = async (cell: Cell<TableDataObject>) => {
         let path = cell.row.original.path;
         let idbFile:
@@ -199,8 +209,27 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                                                 {
                                                     <DirectoryButton
                                                         onClick={() =>
-                                                            viewImageHandler(
-                                                                cell
+                                                            // setBigViewProps(
+                                                            //     (prevState) => {
+                                                            //         return {
+                                                            //             path: cell
+                                                            //                 .row
+                                                            //                 .original
+                                                            //                 .path,
+                                                            //             index: cell
+                                                            //                 .row
+                                                            //                 .original
+                                                            //                 .id,
+                                                            //             refresh: prevState.refresh + 1
+                                                            //         };
+                                                            //     }
+                                                            // )
+                                                            setCurrentBigImage(
+                                                                cell.row
+                                                                    .original
+                                                                    .path,
+                                                                cell.row
+                                                                    .original.id
                                                             )
                                                         }
                                                     >

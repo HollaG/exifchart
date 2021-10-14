@@ -2,11 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ModalStructure {
     src: string;
-    details: DetailObject;
+    // details: DetailObject;
     title: string,
     desc: string,
     path: string,
-    index: number
+    index: number,
+    showing: boolean
 }
 
 interface DetailObject {
@@ -19,18 +20,19 @@ interface DetailObject {
 }
 const initialState: ModalStructure = {
     src: "",
-    details: {
-        cameraModel: "",
-        lensModel: "",
-        aperture: 0,
-        focalLength: 0,
-        iso: 0,
-        shutterSpeed: 0,
-    },
+    // details: {
+    //     cameraModel: "",
+    //     lensModel: "",
+    //     aperture: 0,
+    //     focalLength: 0,
+    //     iso: 0,
+    //     shutterSpeed: 0,
+    // },
     title: '',
     desc: '',
     path: '',
-    index: 0
+    index: 0,
+    showing: false
 };
 
 const modalSlice = createSlice({
@@ -84,8 +86,17 @@ const modalSlice = createSlice({
             state.path = action.payload.path
             state.index = action.payload.index
         },
+        setModalProps(state, action:PayloadAction<ModalStructure>) {
+            console.log(action.payload)
+            state.src = action.payload.src
+            state.title = action.payload.title
+            state.desc = action.payload.desc
+            state.path = action.payload.path
+            state.index = action.payload.index
+            state.showing = action.payload.showing
+        },
         clearModal(state) {
-            state.src = ""
+            state.showing = false
         },
     },
 });

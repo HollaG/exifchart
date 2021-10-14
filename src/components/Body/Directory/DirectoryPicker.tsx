@@ -8,6 +8,7 @@ import { setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
 import ImageDetails from "../../models/ImageDetails";
 import { supported, directoryOpen, fileOpen } from "browser-fs-access";
+import imageCompression from "browser-image-compression";
 
 const calculate35mmFocalLength = (tags: {
     FocalLengthIn35mmFormat: number;
@@ -79,7 +80,10 @@ const calculate35mmFocalLength = (tags: {
         return 0;
     }
 };
-
+const imageCompressionOptions = {
+    maxWidthOrHeight: 3840,
+    useWebWorker: true,
+};
 const DirectoryPicker = () => {
     const dispatch = useDispatch();
 
@@ -91,16 +95,13 @@ const DirectoryPicker = () => {
             ): Promise<{
                 directoriesToAdd: string[];
                 filesToAdd: { [key: string]: ImageDetails };
-                indexedDBtoAdd: [
-                    string,
-                    { entry: FileSystemHandle; thumbnail: string }
-                ][];
+                indexedDBtoAdd: [string, { entry: FileSystemFileHandle; thumbnail: string }][];
             }> => {
                 let directoriesToAdd: string[] = [];
                 let filesToAdd: { [key: string]: ImageDetails } = {};
                 let indexedDBtoAdd: [
                     string,
-                    { entry: FileSystemHandle; thumbnail: string }
+                    { entry: FileSystemFileHandle; thumbnail: string }
                 ][] = [];
 
                 for await (const entry of directory.values()) {
@@ -116,10 +117,10 @@ const DirectoryPicker = () => {
                                 : entry.name;
 
                             // todo
-                            indexedDBtoAdd.push([
-                                pathToFile,
-                                { entry, thumbnail: "" },
-                            ]);
+                            // indexedDBtoAdd.push([
+                            //     pathToFile,
+                            //     { entry, thumbnail: "" },
+                            // ]);
                             // await set(pathToFile, entry);
 
                             // console.log(`-- Found directory: ${entry.name} --`);
@@ -175,14 +176,22 @@ const DirectoryPicker = () => {
                                       }`
                                     : entry.name;
 
-                                // todo
+                                // todo - What is the performance implication of calling .getFile() for every image?
                                 indexedDBtoAdd.push([
                                     pathToFile,
                                     { entry, thumbnail: "" },
                                 ]);
-                                // await set(pathToFile, entry);
 
+                                // await set(pathToFile, entry);
+                                
                                 let file = await entry.getFile();
+                                // indexedDBtoAdd.push([
+                                //     pathToFile,
+                                //     {
+                                //         entry: file,
+                                //         thumbnail: "",
+                                //     },
+                                // ]);
 
                                 const fileData = await exifr.parse(
                                     file,
@@ -213,7 +222,6 @@ const DirectoryPicker = () => {
                                     cameraModel: fileData.Model,
                                     whiteBalance: fileData.WhiteBalance,
                                 };
-                                
 
                                 directoriesToAdd.push(
                                     [
@@ -258,60 +266,94 @@ const DirectoryPicker = () => {
             ): Promise<{
                 directoriesToAdd: string[];
                 filesToAdd: { [key: string]: ImageDetails };
-                indexedDBtoAdd: [string, { entry: File; thumbnail: string }][];
+                indexedDBtoAdd: [string, { entry: string; thumbnail: string }][];
             }> => {
                 let directoriesToAdd: string[] = [];
                 let filesToAdd: { [key: string]: ImageDetails } = {};
                 let indexedDBtoAdd: [
                     string,
-                    { entry: File; thumbnail: string }
+                    { entry: string; thumbnail: string }
                 ][] = [];
 
-                let alreadyAddedDirectories: {[key:string]: boolean} = {}
+                let alreadyAddedDirectories: { [key: string]: boolean } = {};
                 for await (const file of files) {
-                    // @ts-ignore
-                    let directParent = file.directoryHandle.name;
-                    let fullPathToFile = `${directParent}/${file.name}`;
+                    let fileType = file.name.split(".").pop();
 
-                    // Because of the way the iterator works in the case where File System Accses API is supported,
-                    // every time we encounter a new directory, we need to add it to the directoriesToAdd array.
-                    // *Only if it hasn't been added already
-                    // For example: ['new_directory', 'new_directory/image_1.jpg', 'new_directory/image_2.jpg", "second_dir", "second_dir/image_3.jpg"]
-                    if (!alreadyAddedDirectories[directParent]) {
-                        alreadyAddedDirectories[directParent] = true
-                        directoriesToAdd.push(directParent)
+                    if (
+                        fileType &&
+                        CONSTANTS.SUPPORTED_FILETYPES.includes(
+                            fileType.toLowerCase()
+                        )
+                    ) {
+                        // console.log(file.webkitRelativePath);
+                        
+                        // let fullPathToFile = `${directParent}/${file.name}`;
+                        let pathArr = file.webkitRelativePath.split("/")
+                        pathArr.shift()
+                        let fullPathToFile = pathArr.join("/");
+
+                        // Because of the way the iterator works in the case where File System Accses API is supported,
+                        // every time we encounter a new directory, we need to add it to the directoriesToAdd array.
+                        // *Only if it hasn't been added already
+                        // For example: ['new_directory', 'new_directory/image_1.jpg', 'new_directory/image_2.jpg", "second_dir", "second_dir/image_3.jpg"]
+                        // if (!alreadyAddedDirectories[directParent]) {
+                        //     alreadyAddedDirectories[directParent] = true;
+                        //     directoriesToAdd.push(directParent);
+                        // }
+
+                        pathArr.reduce((a: string[], r, i) => {
+                            console.log({ a, r });
+                            let newElem = `${
+                                a[i - 1] ? `${a[i - 1]}/${r}` : r
+                            }`; // Adds only the previous element to the left of the current directory / file
+                            if (!alreadyAddedDirectories[newElem]) {
+                                alreadyAddedDirectories[newElem] = true;
+                                directoriesToAdd.push(newElem);
+                            }
+                            return [...a, newElem];
+                        }, []);
+
+                        
+                        // directoriesToAdd.push(fullPathToFile);
+                        const fileData = await exifr.parse(
+                            file,
+                            // CONSTANTS.EXIF_TAGS
+                            {
+                                iptc: true,
+                            }
+                        );
+
+                        // Push the item into the Redux store
+                        pathArr.pop(); // Remove the file name from the path array
+                        let filePath = pathArr.join("/");
+
+                        filesToAdd[fullPathToFile] = {
+                            name: file.name,
+                            path: filePath,
+                            aperture: fileData.FNumber,
+                            focalLength: calculate35mmFocalLength(fileData),
+                            iso: fileData.ISO,
+                            shutterSpeed:
+                                Math.round(10 / fileData.ExposureTime) / 10,
+                            exposureCompensation: fileData.ExposureCompensation,
+                            exposureMode: fileData.ExposureProgram,
+                            lensModel: fileData.LensModel,
+                            cameraModel: fileData.Model,
+                            whiteBalance: fileData.WhiteBalance,
+                        };
+                       
+                        indexedDBtoAdd.push([
+                            fullPathToFile,
+                            { entry: URL.createObjectURL(file), thumbnail: "" },
+                        ]);
+                        dispatch(
+                            statusActions.setStatus(
+                                `Found ${file.name}<br/>in directory: ${
+                                    filePath ? filePath : "/"
+                                }`
+                            )
+                        );
                     }
-                    directoriesToAdd.push(fullPathToFile);
-                    const fileData = await exifr.parse(
-                        file,
-                        // CONSTANTS.EXIF_TAGS
-                        {
-                            iptc: true,
-                        }
-                    );
-
-                    // Push the item into the Redux store
-                    let filePath = currentDirectoryPathArray.join("/");
-
-                    filesToAdd[fullPathToFile] = {
-                        name: file.name,
-                        path: directParent,
-                        aperture: fileData.FNumber,
-                        focalLength: calculate35mmFocalLength(fileData),
-                        iso: fileData.ISO,
-                        shutterSpeed:
-                            Math.round(10 / fileData.ExposureTime) / 10,
-                        exposureCompensation: fileData.ExposureCompensation,
-                        exposureMode: fileData.ExposureProgram,
-                        lensModel: fileData.LensModel,
-                        cameraModel: fileData.Model,
-                        whiteBalance: fileData.WhiteBalance,
-                    };
-
-                    indexedDBtoAdd.push([
-                        fullPathToFile,
-                        { entry: file, thumbnail: "" },
-                    ]);
                 }
                 return {
                     directoriesToAdd,
@@ -325,10 +367,13 @@ const DirectoryPicker = () => {
             // });
             // console.log(blobsInDirectory);
 
-            if (supported) {
+            // if (!supported) {
                 const blobsInDirectory = await directoryOpen({
                     recursive: true,
+                    id: "testOpts",
                 });
+                let timeStart = performance.now();
+
                 console.log(blobsInDirectory);
                 const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
                     await getFallbackFiles(blobsInDirectory, []);
@@ -339,42 +384,50 @@ const DirectoryPicker = () => {
                 dispatch(directoriesActions.setDirectories(directoriesToAdd));
                 dispatch(filesActions.setFiles(filesToAdd));
                 dispatch(directoriesActions.constructTree());
-            } else {
-                // Request permission from user to scan the directories
-                const dirHandle = await window.showDirectoryPicker();
-                let timeStart = performance.now();
-
-                // Set status
-                dispatch(statusActions.setStatus("Starting scan..."));
-
-                // Start recursive function
-                const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
-                    await getFiles(dirHandle, []);
-
-                // Update the indexedDB
-                dispatch(statusActions.setStatus("Updating IndexedDB..."));
-                await setMany(indexedDBtoAdd);
-                dispatch(
-                    statusActions.setStatus("Completed updating IndexedDB")
-                );
-
-                // Update the states with the new values (directoriesToAdd, filesToAdd)
-                dispatch(directoriesActions.setDirectories(directoriesToAdd));
-                dispatch(filesActions.setFiles(filesToAdd));
-
-                // Set status and construct directory tree
-                // dispatch(statusActions.setStatus("Constructing directory tree..."));
-                // dispatch(statusActions.setNextAction("dirtree"));
-                dispatch(directoriesActions.constructTree());
-
                 let timeTaken =
                     Math.round(((performance.now() - timeStart) / 1000) * 100) /
                     100;
                 dispatch(
                     statusActions.setStatus(`Completed! (${timeTaken} seconds)`)
                 );
-                setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
-            }
+                // setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
+            // } else {
+            //     // Request permission from user to scan the directories
+            //     const dirHandle = await window.showDirectoryPicker();
+            //     let timeStart = performance.now();
+
+            //     // Set status
+            //     dispatch(statusActions.setStatus("Starting scan..."));
+
+            //     // Start recursive function
+            //     const { directoriesToAdd, filesToAdd, indexedDBtoAdd } =
+            //         await getFiles(dirHandle, []);
+
+            //     // Update the indexedDB
+            //     dispatch(statusActions.setStatus("Updating IndexedDB..."));
+
+            //     await setMany(indexedDBtoAdd);
+            //     dispatch(
+            //         statusActions.setStatus("Completed updating IndexedDB")
+            //     );
+
+            //     // Update the states with the new values (directoriesToAdd, filesToAdd)
+            //     dispatch(directoriesActions.setDirectories(directoriesToAdd));
+            //     dispatch(filesActions.setFiles(filesToAdd));
+
+            //     // Set status and construct directory tree
+            //     // dispatch(statusActions.setStatus("Constructing directory tree..."));
+            //     // dispatch(statusActions.setNextAction("dirtree"));
+            //     dispatch(directoriesActions.constructTree());
+
+            //     let timeTaken =
+            //         Math.round(((performance.now() - timeStart) / 1000) * 100) /
+            //         100;
+            //     dispatch(
+            //         statusActions.setStatus(`Completed! (${timeTaken} seconds)`)
+            //     );
+            //     setTimeout(() => dispatch(statusActions.setStatus("")), 5000);
+            // }
         } catch (e) {
             console.log(e);
         }

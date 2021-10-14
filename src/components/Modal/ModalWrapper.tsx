@@ -6,7 +6,7 @@ import DirectoryButton from "../../ui/DirectoryButton";
 
 
 
-const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string, changePreviewHandler: (next: boolean) => void }> = ({ src,title, desc, path, changePreviewHandler }) => {
+const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: string, changeCurrentBigImage: (next: boolean) => void }> = ({ src,title, desc, path, changeCurrentBigImage }) => {
     const dispatch = useDispatch()
     const closeModalHandler = () => {
         dispatch(modalActions.clearModal())
@@ -45,8 +45,8 @@ const ModalWrapper: React.FC<{ src: string, title:string, desc: string, path: st
                     top: "1%"
                 }}> 
                     
-                    <DirectoryButton extraClasses="mx-2" onClick={() => changePreviewHandler(false)}> Previous </DirectoryButton>
-                    <DirectoryButton extraClasses="mx-2" onClick={() => changePreviewHandler(true)}> Next </DirectoryButton>
+                    <DirectoryButton extraClasses="mx-2" onClick={() => changeCurrentBigImage(false)}> Previous </DirectoryButton>
+                    <DirectoryButton extraClasses="mx-2" onClick={() => changeCurrentBigImage(true)}> Next </DirectoryButton>
                     
                 </div>
                 <img

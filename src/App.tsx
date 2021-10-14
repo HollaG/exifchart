@@ -10,6 +10,7 @@ import firstLoad from "./config/first_load";
 import verifyPermission from "./functions/verifyPermissions";
 import { modalActions } from "./store/modal-slice";
 import { supported } from "browser-fs-access";
+import useImage from "./hooks/useImage";
 
 function App() {
     useEffect(firstLoad, [firstLoad]);
@@ -20,85 +21,86 @@ function App() {
     );
     const imageMap = useSelector((state: RootState) => state.files.files);
 
+    const { changeCurrentBigImage } = useImage()
+
     const changePreviewHandler = async (
         next: boolean,
         specifiedIndex?: number
+        
     ) => {
-        let index = typeof specifiedIndex !== 'undefined' ? specifiedIndex : modal.index;
-        let newIndex: number;
+        return
+        // let index = typeof specifiedIndex !== 'undefined' ? specifiedIndex : modal.index;
+        // let newIndex: number;
 
-        if (next) {
-            newIndex = index + 1;
-            if (newIndex === folderList.length) newIndex = 0;
-        } else {
-            newIndex = index - 1;
-            if (newIndex < 0) newIndex = folderList.length - 1;
-        }
-        // get the filepath of the new index
-        const newFilePath = folderList[newIndex];
-        console.log({newIndex, newFilePath})
+        // if (next) {
+        //     newIndex = index + 1;
+        //     if (newIndex === folderList.length) newIndex = 0;
+        // } else {
+        //     newIndex = index - 1;
+        //     if (newIndex < 0) newIndex = folderList.length - 1;
+        // }
+        // // get the filepath of the new index
+        // const newFilePath = folderList[newIndex];
+        // console.log({newIndex, newFilePath})
 
-        let imageBlob: File;
+        // let imageBlob: File;
 
-        if (supported) {
-            let idbFile: { entry: File; thumbnail: string } | undefined =
-                await get(newFilePath);
-            console.log(idbFile )
-            if (!idbFile) {
-                changePreviewHandler(next, newIndex); // Skip the directory
-                return;
-            } else {
-                imageBlob = idbFile.entry;
-            }
-        } else {
-            let idbFile:
-                | { entry: FileSystemFileHandle; thumbnail: string }
-                | undefined = await get(newFilePath);
-            if (!idbFile) return alert("Unknown error occured!");
+        // if (supported) {
+        //     let idbFile: { entry: File; thumbnail: string } | undefined =
+        //         await get(newFilePath);
+        //     console.log(idbFile )
+        //     if (!idbFile) {
+        //         changePreviewHandler(next, newIndex); // Skip the directory
+        //         return;
+        //     } else {
+        //         imageBlob = idbFile.entry;
+        //     }
+        // } else {
+        //     let idbFile:
+        //         | { entry: FileSystemFileHandle; thumbnail: string }
+        //         | undefined = await get(newFilePath);
+        //     if (!idbFile) return alert("Unknown error occured!");
 
-            if (idbFile.entry.kind !== "file") {
-                changePreviewHandler(next, newIndex); // Skip the directory
-                return;
-            }
+        //     if (idbFile.entry.kind !== "file") {
+        //         changePreviewHandler(next, newIndex); // Skip the directory
+        //         return;
+        //     }
 
-            let perm = await verifyPermission(idbFile.entry, false);
-            if (!perm)
-                return alert(
-                    "You need to provide permission to view this image!"
-                );
-            imageBlob = await idbFile.entry.getFile();
-        }
+        //     let perm = await verifyPermission(idbFile.entry, false);
+        //     if (!perm)
+        //         return alert(
+        //             "You need to provide permission to view this image!"
+        //         );
+        //     imageBlob = await idbFile.entry.getFile();
+        // }
 
-        let imageSrc = URL.createObjectURL(imageBlob);
+        // let imageSrc = URL.createObjectURL(imageBlob);
 
-        let image = imageMap[newFilePath];
+        // let image = imageMap[newFilePath];
 
-        dispatch(
-            modalActions.setModal({
-                src: imageSrc,
-                detailObject: {
-                    cameraModel: image.cameraModel,
-                    lensModel: image.lensModel,
-                    aperture: image.aperture,
-                    shutterSpeed: Number(image.shutterSpeed),
-                    focalLength: image.focalLength,
-                    iso: image.iso,
-                },
-                path: newFilePath,
-                index: newIndex,
-            })
-        );
+        // dispatch(
+        //     modalActions.setModal({
+        //         src: imageSrc,
+        //         detailObject: {
+        //             cameraModel: image.cameraModel,
+        //             lensModel: image.lensModel,
+        //             aperture: image.aperture,
+        //             shutterSpeed: Number(image.shutterSpeed),
+        //             focalLength: image.focalLength,
+        //             iso: image.iso,
+        //         },
+        //         path: newFilePath,
+        //         index: newIndex,
+        //     })
+        // );
     };
 
-    const supported = Boolean(
-        typeof window.showDirectoryPicker !== "undefined"
-    );
 
     return (
         <>
             <Navbar />
             <main className="px-2 w-screen md:w-9/12 mx-auto my-8">
-                {supported ? (
+                {true ? ( // TODO
                     <>
                         <Header />
                         <Body />
@@ -121,13 +123,13 @@ function App() {
                     </>
                 )}
             </main>
-            {modal.src && (
+            {modal.showing && (
                 <ModalWrapper
                     src={modal.src}
                     title={modal.title}
                     desc={modal.desc}
                     path={modal.path}
-                    changePreviewHandler={changePreviewHandler}
+                    changeCurrentBigImage={changeCurrentBigImage}
                 />
             )}
         </>
