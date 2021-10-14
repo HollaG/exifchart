@@ -54,10 +54,12 @@ const directoriesSlice = createSlice({
             if (state.rootFolder.length) {
                 state.rootFolder.forEach((tree) => {
                     // Get the total number of children of this tree
-                    // However, note that the root tree itself should not be added to the iterator              
+                    // However, note that the root tree itself should also be added to the iterator     
+                    // This is because the root is also counted in folderList         
+                    getChildren(tree.children);
+                    indexToStartIterating++
 
                     
-                    getChildren(tree.children);
                     
                 });
             }
@@ -76,6 +78,7 @@ const directoriesSlice = createSlice({
                             label: name,
                             children: r[name].result,
                         });
+                        // Impossible to determine if there are children, hence we will add it for BOTH files and folders
                         state.mapFolderOrFileIdToImage[id] = Object.keys(
                             state.mapFolderOrFileIdToImage
                         ).length;
@@ -85,11 +88,12 @@ const directoriesSlice = createSlice({
             }
 
             // console.log("Completed directory tree construction");
-            state.rootFolder.push({
-                value: state.rootFolder.length.toString(),
-                label: `Import ${state.rootFolder.length + 1}`,
-                children: result,
-            });
+            // state.rootFolder.push({
+            //     value: state.rootFolder.length.toString(),
+            //     label: `Import ${state.rootFolder.length + 1}`,
+            //     children: result,
+            // });
+            state.rootFolder.push(...result)
             state.constructing = false;
 
             // state.rootFolder = result

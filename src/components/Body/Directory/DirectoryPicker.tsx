@@ -221,6 +221,7 @@ const DirectoryPicker = () => {
                                     lensModel: fileData.LensModel,
                                     cameraModel: fileData.Model,
                                     whiteBalance: fileData.WhiteBalance,
+                                    index: 0
                                 };
 
                                 directoriesToAdd.push(
@@ -266,13 +267,13 @@ const DirectoryPicker = () => {
             ): Promise<{
                 directoriesToAdd: string[];
                 filesToAdd: { [key: string]: ImageDetails };
-                indexedDBtoAdd: [string, { entry: string; thumbnail: string }][];
+                indexedDBtoAdd: [string, string][];
             }> => {
                 let directoriesToAdd: string[] = [];
                 let filesToAdd: { [key: string]: ImageDetails } = {};
                 let indexedDBtoAdd: [
                     string,
-                    { entry: string; thumbnail: string }
+                    string
                 ][] = [];
 
                 let alreadyAddedDirectories: { [key: string]: boolean } = {};
@@ -289,7 +290,7 @@ const DirectoryPicker = () => {
                         
                         // let fullPathToFile = `${directParent}/${file.name}`;
                         let pathArr = file.webkitRelativePath.split("/")
-                        pathArr.shift()
+                        // pathArr.shift()
                         let fullPathToFile = pathArr.join("/");
 
                         // Because of the way the iterator works in the case where File System Accses API is supported,
@@ -301,19 +302,28 @@ const DirectoryPicker = () => {
                         //     directoriesToAdd.push(directParent);
                         // }
 
-                        pathArr.reduce((a: string[], r, i) => {
-                            console.log({ a, r });
-                            let newElem = `${
-                                a[i - 1] ? `${a[i - 1]}/${r}` : r
-                            }`; // Adds only the previous element to the left of the current directory / file
-                            if (!alreadyAddedDirectories[newElem]) {
-                                alreadyAddedDirectories[newElem] = true;
-                                directoriesToAdd.push(newElem);
-                            }
-                            return [...a, newElem];
-                        }, []);
+                        // pathArr.reduce((a: string[], r, i) => {
+                        //     console.log({ a, r });
+                        //     let newElem = `${
+                        //         a[i - 1] ? `${a[i - 1]}/${r}` : r
+                        //     }`; // Adds only the previous element to the left of the current directory / file
+                        //     if (!alreadyAddedDirectories[newElem]) {
+                        //         alreadyAddedDirectories[newElem] = true;
+                        //         directoriesToAdd.push(newElem);
+                        //     }
+                        //     return [...a, newElem];
+                        // }, []);
 
+                        pathArr.forEach((element, index) => { 
+                            let path = [...pathArr.slice(0, index), element].join("/")
+                            if (!alreadyAddedDirectories[path]) {
+                                alreadyAddedDirectories[path] = true;
+                                directoriesToAdd.push(path);
+                            }
+                        })
                         
+
+
                         // directoriesToAdd.push(fullPathToFile);
                         const fileData = await exifr.parse(
                             file,
@@ -340,11 +350,14 @@ const DirectoryPicker = () => {
                             lensModel: fileData.LensModel,
                             cameraModel: fileData.Model,
                             whiteBalance: fileData.WhiteBalance,
+                            index: directoriesToAdd.length-1 // Subtract 1 because we want to refer to this element in folderList. However, in directoriesToAdd, 
+                            // we've already included this element.
+                            // ['other elem, 'the elem we want'] --> length: 2, index: 1
                         };
                        
                         indexedDBtoAdd.push([
                             fullPathToFile,
-                            { entry: URL.createObjectURL(file), thumbnail: "" },
+                            URL.createObjectURL(file)
                         ]);
                         dispatch(
                             statusActions.setStatus(

@@ -9,5 +9,6 @@ export default interface ImageDetails {
     exposureMode: string,
     lensModel: string,
     cameraModel: string,
-    whiteBalance: string
+    whiteBalance: string,
+    index: number
 }

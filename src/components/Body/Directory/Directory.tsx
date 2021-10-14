@@ -128,7 +128,7 @@ const Directory = () => {
             // Try to get the file handle from IndexedDB
             console.log(filePath);
             let idbFile:
-                | { entry: string; thumbnail: string }
+                | string
                 | undefined = await get(filePath);
 
             if (!idbFile)
@@ -136,17 +136,17 @@ const Directory = () => {
                     "No file handle found - error occured somewhere?"
                 );
 
-            if (idbFile.thumbnail) {
-                // Previously loaded into DB
-                // console.log("File string found");
-                setImage({
-                    src: idbFile.thumbnail,
-                    path: filePath,
-                    index: folderPathIndex,
-                });
-                return;
-            }
-            let imageBlob: File = new File([idbFile.entry], "");
+            // if (idbFile.thumbnail) {
+            //     // Previously loaded into DB
+            //     // console.log("File string found");
+            //     setImage({
+            //         src: idbFile.thumbnail,
+            //         path: filePath,
+            //         index: folderPathIndex,
+            //     });
+            //     return;
+            // }
+            // let imageBlob: File = new File([idbFile.entry], "");
             // if ("getFile" in idbFile.entry) {
             //     // Using File System Access API
             //     // File handle found. Load as BLOB
@@ -175,13 +175,13 @@ const Directory = () => {
             // );
             // let imageSrc = URL.createObjectURL(compressedImage); // this is the 'src' property
             // Add thumbnail to the db
-            await set(filePath, {
-                entry: idbFile.entry,
-                thumbnail: idbFile.entry,
-            });
+            // await set(filePath, {
+            //     entry: idbFile.entry,
+            //     thumbnail: idbFile.entry,
+            // });
 
             setImage({
-                src: idbFile.entry,
+                src: idbFile,
                 path: filePath,
                 index: folderPathIndex,
             });
@@ -189,11 +189,6 @@ const Directory = () => {
             // console.log("no index!");
         }
     };
-
-    const [bigViewProps, setBigViewProps] = useState({
-        path: "",
-        index: 0,
-    });
 
     // useImage(bigViewProps.path, bigViewProps.index, bigViewProps.refresh)
 

@@ -53,8 +53,6 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
         state: { pageIndex },
     } = tableInstance;
 
-    const imageMap = useSelector((state: RootState) => state.files.files);
-    const dispatch = useDispatch();
 
     const [bigViewProps, setBigViewProps] = useState({
         path: "",
@@ -64,44 +62,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
 
     const { setCurrentBigImage } = useImage();
 
-    const viewImageHandler = async (cell: Cell<TableDataObject>) => {
-        let path = cell.row.original.path;
-        let idbFile:
-            | { entry: FileSystemFileHandle | File; thumbnail: string }
-            | undefined = await get(path);
 
-        let imageBlob: File;
-        if (!idbFile) return;
-        if ("getFile" in idbFile.entry) {
-            let perm = await verifyPermission(idbFile.entry, false);
-            if (!perm)
-                return alert(
-                    "You need to provide permission to view this image!"
-                );
-            imageBlob = await idbFile.entry.getFile();
-        } else {
-            imageBlob = idbFile.entry;
-        }
-
-        let imageSrc = URL.createObjectURL(imageBlob);
-
-        let image = imageMap[path];
-        dispatch(
-            modalActions.setModal({
-                src: imageSrc,
-                detailObject: {
-                    cameraModel: image.cameraModel,
-                    lensModel: image.lensModel,
-                    aperture: image.aperture,
-                    shutterSpeed: Number(image.shutterSpeed),
-                    focalLength: image.focalLength,
-                    iso: image.iso,
-                },
-                path,
-                index: cell.row.original.id,
-            })
-        );
-    };
 
     return (
         <div style={{ maxHeight: "85vh" }}>
@@ -229,7 +190,7 @@ const TableViewer = React.forwardRef<HTMLTableElement>((props, ref) => {
                                                                     .original
                                                                     .path,
                                                                 cell.row
-                                                                    .original.id
+                                                                    .original.index
                                                             )
                                                         }
                                                     >

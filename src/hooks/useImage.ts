@@ -18,6 +18,7 @@ const useImage = () => {
     const folderList = useSelector(
         (state: RootState) => state.directories.folderList
     );
+
     const modalIndex = useSelector((state: RootState) => state.modal.index)
 
     const dispatch = useDispatch();
@@ -26,32 +27,34 @@ const useImage = () => {
     
     const setCurrentBigImage = useCallback(
         async (pathArg: string, indexArg: number) => {
-            let imageBlob: File;
+            // let imageBlob: File;
 
-            if (supported) {
-                let idbFile: { entry: File; thumbnail: string } | undefined =
-                    await get(pathArg);
-                console.log(idbFile);
-                if (!idbFile) {
-                    return;
-                } else {
-                    imageBlob = idbFile.entry;
-                }
-            } else {
-                let idbFile:
-                    | { entry: FileSystemFileHandle; thumbnail: string }
-                    | undefined = await get(pathArg);
-                if (!idbFile) return alert("Unknown error occured!");
+            // if (supported) {
+            //     let idbFile: { entry: File; thumbnail: string } | undefined =
+            //         await get(pathArg);
+            //     console.log(idbFile);
+            //     if (!idbFile) {
+            //         return;
+            //     } else {
+            //         imageBlob = idbFile.entry;
+            //     }
+            // } else {
+            //     let idbFile:
+            //         | { entry: FileSystemFileHandle; thumbnail: string }
+            //         | undefined = await get(pathArg);
+            //     if (!idbFile) return alert("Unknown error occured!");
 
-                let perm = await verifyPermission(idbFile.entry, false);
-                if (!perm)
-                    return alert(
-                        "You need to provide permission to view this image!"
-                    );
-                imageBlob = await idbFile.entry.getFile();
-            }
+            //     let perm = await verifyPermission(idbFile.entry, false);
+            //     if (!perm)
+            //         return alert(
+            //             "You need to provide permission to view this image!"
+            //         );
+            //     imageBlob = await idbFile.entry.getFile();
+            // }
 
-            let imageSrc = URL.createObjectURL(imageBlob);
+            // let imageSrc = URL.createObjectURL(imageBlob);
+
+            let imageSrc = await get(pathArg)
 
             let imageDetails = imageMap[pathArg];
             let header = ["Shot on"];
@@ -141,7 +144,8 @@ const useImage = () => {
             if (newIndex < 0) newIndex = folderList.length - 1;
         }
         // get the filepath of the new index
-        const newFilePath = folderList[newIndex];
+        // const newFilePath = folderList[newIndex];
+        const newFilePath = folderList[newIndex]
         
         if (!imageMap[newFilePath]) { 
             // This item is not in the imageMap, hence it is a directory
