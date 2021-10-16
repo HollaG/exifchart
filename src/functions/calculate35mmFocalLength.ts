@@ -29,11 +29,10 @@ export default function calculate35mmFocalLength(tags: {
         ResolutionUnit,
         FocalPlaneResolutionUnit,
     } = tags;
-
+    console.log(tags)
     if (FocalLength || FocalLengthIn35mmFormat) {
         if (FocalLengthIn35mmFormat) return Number(FocalLengthIn35mmFormat);
-
-        if (!ExifImageHeight || !ExifImageWidth) return Number(FocalLength);
+        if (!ExifImageHeight || !ExifImageWidth || !ResolutionUnit || !FocalPlaneResolutionUnit) return Number(FocalLength);
 
         let ppi = Number(FocalPlaneXResolution);
         if (FocalPlaneXResolution !== FocalPlaneYResolution) {
@@ -63,7 +62,6 @@ export default function calculate35mmFocalLength(tags: {
 
         const equivFocalLength = FocalLength * roundedCropFactor;
         const roundedEquivFocalLength = Math.round(equivFocalLength);
-
         return roundedEquivFocalLength;
     } else {
         return 0;

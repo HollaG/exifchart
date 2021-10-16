@@ -11,7 +11,7 @@ import useImage from "./hooks/use-image";
 import MultipleBody from "./components/Body/MultipleBody/Body";
 import SingleBody from "./components/Body/SingleBody/Body";
 
-import { isBrowser } from "react-device-detect";
+import { isBrowser, isMobileSafari } from "react-device-detect";
 import { NavLink } from "react-router-dom";
 function App() {
     useEffect(firstLoad, [firstLoad]);
@@ -28,20 +28,41 @@ function App() {
                     <Route path="/" exact>
                         <Suspense fallback={<div> Loading... </div>}>
                             {isBrowser && <MultipleBody />}
-                            {!isBrowser && (
+                            {!isBrowser && !isMobileSafari && (
                                 <>
-                                    <h1 className="text-xl">                                        
+                                    <h1 className="text-xl">
                                         Sorry, your mobile device does not
-                                        support directory analysis.                                        
+                                        support directory analysis.
                                     </h1>
-                                    <p className="mt-3"> You may open this web app on a desktop, or use the <span className="text-blue-500 underline"><NavLink to="/single">single image analyzer</NavLink></span>.</p>
+                                    <p className="mt-3">
+                                        You may open this web app on a desktop,
+                                        or use the{" "}
+                                        <span className="text-blue-500 underline">
+                                            <NavLink to="/single">
+                                                single image analyzer
+                                            </NavLink>
+                                        </span>
+                                        .
+                                    </p>
                                 </>
+                            )}
+                            {!isBrowser && isMobileSafari && (
+                                <h1 className="text-xl">
+                                    Sorry, Safari does not support this web app.
+                                    Please use Chrome for iOS instead.
+                                </h1>
                             )}
                         </Suspense>
                     </Route>
                     <Route path="/single" exact>
                         <Suspense fallback={<div> Loading... </div>}>
-                            <SingleBody />
+                            {!isBrowser && isMobileSafari && (
+                                <h1 className="text-xl">
+                                    Sorry, Safari does not support this web app.
+                                    Please use Chrome for iOS instead.
+                                </h1>
+                            )}
+                            {!isMobileSafari && <SingleBody />}
                         </Suspense>
                     </Route>
                 </Switch>
