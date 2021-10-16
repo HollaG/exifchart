@@ -5,25 +5,26 @@ const initialState: Status = {
     scanning: false,
     text: "",
     nextAction: "",
+    percent: 0
 };
 
 const statusSlice = createSlice({
     name: "status",
     initialState,
     reducers: {
-        setStatus(state, action: PayloadAction<string>) {
-            if (action.payload) {
+        setStatus(state, action: PayloadAction<{text: string, percent: number}>) {
+            if (action.payload.text) {
                 // if there's a string being set here, it means we are scanning something
                 state.scanning = true;
-                state.text = action.payload;
+                state.text = action.payload.text;
+                state.percent = action.payload.percent
             } else {
                 state.scanning = false;
                 state.text = "";
+                state.percent = 0
             }
         },
-        setNextAction(state, action: PayloadAction<string>) {
-            state.nextAction = action.payload;
-        },
+        
     },
 });
 

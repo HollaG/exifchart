@@ -1,0 +1,1 @@
+declare module 'browser-fs-access/dist';

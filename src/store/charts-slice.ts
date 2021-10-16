@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import ChartData, { DataSet } from "../components/models/ChartData";
 import ImageDetails from "../components/models/ImageDetails";
+import formatShutter from "../functions/formatShutter";
 
 const initialState: {
     focalLength: ChartData;
@@ -447,13 +448,7 @@ const chartsSlice = createSlice({
             }
 
             state.shutterSpeed = {
-                labels: labelsShutterSpeed.map((ss) => {
-                    if (Number(ss) < 1) {
-                        return `${Math.round(10 / Number(ss)) / 10}"`;
-                    } else if (Number(ss) === 1) {
-                        return "1";
-                    } else return `1/${Math.round(Number(ss))}`;
-                }),
+                labels: labelsShutterSpeed.map(formatShutter),
                 datasets: datasetsShutterSpeed,
             };
 

@@ -39,27 +39,11 @@ const directoriesSlice = createSlice({
             let result: resultInterface[] = [];
             let level = { result };
 
-            // Because we merely add a new subtree to the whole directory tree, we need to keep track of which items we loop over in state.folderList. We should only loop over new items, not items already looped over
-            let indexToStartIterating = 0;
-            const getChildren = (children: any) => {
-                for (let child of children) {
-                    indexToStartIterating++;
-                    if (child.children)
-                        if (child.children.length) {
-                            getChildren(child.children);
-                        }
-                }
-            };
-            if (state.rootFolder.length) {
-                state.rootFolder.forEach((tree) => {
-                    // Get the total number of children of this tree
-                    // However, note that the root tree itself should also be added to the iterator
-                    // This is because the root is also counted in folderList
-                    getChildren(tree.children);
-                    indexToStartIterating++;
-                });
-            }
-
+            // How many items were previously already added in 'folderList'? We skip these items so that we do not double-count stuff
+            // A new import should be appended to the end of the structure, and should not include any items which were already in the structure.
+            // The # of items already included in the structure is given by the number of elements in the mapOfFolderOrFileIdToImage. 
+            // folderList is not considered because the new items were already added to folderList.
+            let indexToStartIterating = Object.keys(state.mapFolderOrFileIdToImage).length 
             for (let i = indexToStartIterating; i < directories.length; i++) {
                 let path = directories[i];
                 path.split("/").reduce((r: any, name) => {
@@ -74,16 +58,14 @@ const directoriesSlice = createSlice({
                             children: r[name].result,
                         });
                         // Impossible to determine if there are children, hence we will add it for BOTH files and folders
-                        state.mapFolderOrFileIdToImage[id] = Object.keys(
-                            state.mapFolderOrFileIdToImage
-                        ).length;
+                        state.mapFolderOrFileIdToImage[id] = i
                     }
                     return r[name];
                 }, level);
             }
-
             state.rootFolder.push(...result);
             state.constructing = false;
+
         },
     },
 });

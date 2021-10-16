@@ -53,7 +53,7 @@ const TableViewer = () => {
     const { setCurrentBigImage } = useImage();
 
     return (
-        <div style={{ maxHeight: "85vh" }}>
+        <div>
             <div className="pagination text-right">
                 <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
                     {"<<"}

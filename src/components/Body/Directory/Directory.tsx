@@ -132,8 +132,8 @@ const Directory = () => {
 
     const { setCurrentBigImage } = useImage();
 
-    const scanningStatusText = useSelector(
-        (state: RootState) => state.status.text
+    const scanningStatus = useSelector(
+        (state: RootState) => state.status
     );
 
     const setItemCheckedHandler = (
@@ -143,6 +143,10 @@ const Directory = () => {
         setAllowChartReRender(true); // Only allow the function in useCallback() to run once the user starts
     };
 
+    const width = `calc(${scanningStatus.percent}% - 8px)`;
+
+    
+
     return (
         <Container width="xl:w-96">
             <ContainerHeader>
@@ -151,6 +155,17 @@ const Directory = () => {
                     <DirectoryPicker />
                 </div>
             </ContainerHeader>
+            {scanningStatus.scanning && (
+                <div
+                    className="prog-bar bg-blue-500 absolute"
+                    style={{
+                        height: "2px",
+                        transform: "translate(0, 4px)",
+                        left: "4px",
+                        width: width,
+                    }}
+                />
+            )}
             <ContainerContents>
                 <div
                     className="min-size-wrapper-directory h-100 break-all"
@@ -158,13 +173,13 @@ const Directory = () => {
                         maxHeight: "calc(85vh - 260px)",
                     }}
                 >
-                    {scanningStatusText && (
+                    {scanningStatus.scanning && (
                         <div>
                             <p className="whitespace-nowrap text-end overflow-ellipsis overflow-hidden">
-                                {scanningStatusText.split("<br/>")[0]}
+                                {scanningStatus.text.split("<br/>")[0]}
                             </p>
                             <p className="whitespace-nowrap text-end overflow-ellipsis overflow-hidden">
-                                {scanningStatusText.split("<br/>")[1]}
+                                {scanningStatus.text.split("<br/>")[1]}
                             </p>
                         </div>
                     )}

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import ImageDetails from "../components/models/ImageDetails";
 import TableDataObject from "../components/models/TableDataObject";
+import formatShutter from "../functions/formatShutter";
 
 const initialState: {
     files: { [key: string]: ImageDetails };
@@ -32,6 +33,7 @@ const filesSlice = createSlice({
             action: PayloadAction<{ [key: string]: ImageDetails }>
         ) => {
             // console.log("FilesSlice reducer: setFiles");
+            let numberOfItemsAlreadyPresent = state.tableData.length
 
             state.files = { ...state.files, ...action.payload };
             state.tableData = [
@@ -41,20 +43,12 @@ const filesSlice = createSlice({
                         ? `${action.payload[key].path}/${action.payload[key].name}`
                         : action.payload[key].name;
                     let ss = action.payload[key].shutterSpeed;
-                    let formattedShutter = "";
-
-                    if (Number(ss) < 1) {
-                        formattedShutter = `${
-                            Math.round(10 / Number(ss)) / 10
-                        }"`;
-                    } else if (Number(ss) === 1) {
-                        formattedShutter = "1";
-                    } else formattedShutter = `1/${Math.round(Number(ss))}`;
+                    
                     return {
                         ...action.payload[key],
-                        id: index + 1,
+                        id: numberOfItemsAlreadyPresent + index + 1,
                         path: pathToFile,
-                        shutterSpeed: formattedShutter,
+                        shutterSpeed: formatShutter(ss),
                         image: "Load",
                     };
                 }),

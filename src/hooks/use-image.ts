@@ -15,7 +15,17 @@ const useImage = () => {
     const dispatch = useDispatch();
 
     const setCurrentBigImage = useCallback(
-        async (pathArg: string, indexArg: number) => {
+        async (pathArg: string, indexArg: number) => {           
+            dispatch(
+                modalActions.setModalProps({
+                    path: pathArg,
+                    index: indexArg,
+                    src: "./loading.jpg",
+                    desc: "Loading description...",
+                    showing: true,
+                    title: "Loading image...",
+                })
+            );
             let imageSrc = await get(pathArg);
 
             let imageDetails = imageMap[pathArg];
@@ -83,7 +93,16 @@ const useImage = () => {
     );
     const changeCurrentBigImage = useCallback(
         async (next: boolean, specifiedIndex?: number) => {
-            console.log(next, specifiedIndex);
+            dispatch(
+                modalActions.setModalProps({
+                    path: "",
+                    index: 0,
+                    src: "./loading.jpg",
+                    desc: "Loading description...",
+                    showing: true,
+                    title: "Loading image...",
+                })
+            );
             let index =
                 typeof specifiedIndex !== "undefined"
                     ? specifiedIndex
@@ -109,7 +128,7 @@ const useImage = () => {
                 setCurrentBigImage(newFilePath, newIndex);
             }
         },
-        [folderList, imageMap, modalIndex, setCurrentBigImage]
+        [folderList, imageMap, modalIndex, setCurrentBigImage, dispatch]
     );
 
     return { setCurrentBigImage, changeCurrentBigImage };

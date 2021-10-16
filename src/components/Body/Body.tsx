@@ -6,7 +6,7 @@ const Body = () => {
     return (
         <>
             <div className="xl:flex">
-                <section className="m-2 directory-section xl:flex-shrink-0 xl:flex-grow-0">
+                <section className="m-2 directory-section relative xl:flex-shrink-0 xl:flex-grow-0">
                     <Directory />
                 </section>
 

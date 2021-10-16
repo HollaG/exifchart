@@ -1,5 +1,6 @@
 export default interface Status {
     scanning: boolean,
     text: string,
-    nextAction: string
+    nextAction: string,
+    percent: number
 }
