@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Route, Switch } from "react-router";
+import { Route, Switch, useHistory } from "react-router";
 
 // import Header from "./components/Header/Header";
 import ModalWrapper from "./components/Modal/ModalWrapper";
@@ -13,13 +13,15 @@ import SingleBody from "./components/Body/SingleBody/Body";
 
 import { isBrowser, isMobileSafari } from "react-device-detect";
 import { NavLink } from "react-router-dom";
+import NavItem from "./components/Navbar/NavItem";
+import BodyButton from "./ui/BodyButton";
 function App() {
     useEffect(firstLoad, [firstLoad]);
 
     const modal = useSelector((state: RootState) => state.modal);
 
     const { changeCurrentBigImage } = useImage();
-
+    const history = useHistory();
     return (
         <>
             <Navbar />
@@ -29,22 +31,26 @@ function App() {
                         <Suspense fallback={<div> Loading... </div>}>
                             {isBrowser && <MultipleBody />}
                             {!isBrowser && !isMobileSafari && (
-                                <>
+                                <div className="text-center">
                                     <h1 className="text-xl">
                                         Sorry, your mobile device does not
                                         support folder analysis.
                                     </h1>
                                     <p className="mt-3">
                                         You may open this web app on a desktop,
-                                        or use the{" "}
-                                        <span className="text-blue-500 underline">
-                                            <NavLink to="/single">
-                                                single image analyzer
-                                            </NavLink>
-                                        </span>
-                                        .
+                                        or use the single image analyzer
+                                        instead.
                                     </p>
-                                </>
+                                    <div className="mt-3">
+                                        <BodyButton
+                                            onClick={() =>
+                                                history.push("/single")
+                                            }
+                                        >
+                                            Image Analyzer
+                                        </BodyButton>
+                                    </div>
+                                </div>
                             )}
                             {!isBrowser && isMobileSafari && (
                                 <h1 className="text-xl">
