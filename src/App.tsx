@@ -1,14 +1,15 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Route, Switch } from "react-router";
-import Body from "./components/Body/Body";
+
 // import Header from "./components/Header/Header";
 import ModalWrapper from "./components/Modal/ModalWrapper";
 import RootState from "./models/RootState";
 import Navbar from "./components/Navbar/Navbar";
 import firstLoad from "./config/first_load";
 import useImage from "./hooks/use-image";
-
+import MultipleBody from "./components/Body/MultipleBody/Body";
+import SingleBody from "./components/Body/SingleBody/Body";
 function App() {
     useEffect(firstLoad, [firstLoad]);
 
@@ -22,10 +23,14 @@ function App() {
             <main className="px-2 w-screen md:w-9/12 mx-auto my-8">
                 <Switch>
                     <Route path="/" exact>
-                        <Body />
+                        <Suspense fallback={<div> Loading... </div>}>
+                            <MultipleBody />
+                        </Suspense>
                     </Route>
-                    <Route path="/single" exact> 
-                        <p> Single </p>
+                    <Route path="/single" exact>
+                        <Suspense fallback={<div> Loading... </div>}>
+                            <SingleBody />
+                        </Suspense>
                     </Route>
                 </Switch>
             </main>

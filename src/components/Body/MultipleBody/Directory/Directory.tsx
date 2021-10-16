@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import RootState from "../../../models/RootState";
+import RootState from "../../../../models/RootState";
 import DirectoryPicker from "./DirectoryPicker";
 import DirectoryViewer from "./DirectoryViewer";
-import ImageDetails from "../../../models/ImageDetails";
-import { chartsActions } from "../../../store/charts-slice";
+import ImageDetails from "../../../../models/ImageDetails";
+import { chartsActions } from "../../../../store/charts-slice";
 import ImagePreview from "./ImagePreview";
 import { get } from "idb-keyval";
 import Container from "../../../../ui/Container";
 import ContainerHeader from "../../../../ui/ContainerHeader";
 import ContainerContents from "../../../../ui/ContainerContents";
-import TableDataObject from "../../../models/TableDataObject";
-import { filesActions } from "../../../store/files-slice";
-import useImage from "../../../hooks/use-image";
+import TableDataObject from "../../../../models/TableDataObject";
+import { filesActions } from "../../../../store/files-slice";
+import useImage from "../../../../hooks/use-image";
 
 const Directory = () => {
     const [checked, setChecked] = useState<string[]>([]);

@@ -1,7 +1,7 @@
 import Container from "../../../../ui/Container";
 import ContainerContents from "../../../../ui/ContainerContents";
 import ContainerHeader from "../../../../ui/ContainerHeader";
-import DirectoryButton from "../../../../ui/DirectoryButton";
+import BodyButton from "../../../../ui/BodyButton";
 import TableViewer from "./TableViewer";
 
 import XLSX from "xlsx";
@@ -75,12 +75,12 @@ const Table = () => {
             <ContainerHeader>
                 <h1 className="flex-grow text-xl px-3">Table view</h1>
 
-                <DirectoryButton
+                <BodyButton
                     onClick={exportToExcelHandler}
                     extraClasses="mx-2"
                 >
                     Export to Excel
-                </DirectoryButton>
+                </BodyButton>
             </ContainerHeader>
             <ContainerContents>
                 <TableViewer />

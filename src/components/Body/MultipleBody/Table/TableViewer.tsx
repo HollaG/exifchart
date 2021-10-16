@@ -4,7 +4,7 @@ import RootState from "../../../../models/RootState";
 import { usePagination, useSortBy, useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import DirectoryButton from "../../../../../ui/DirectoryButton";
+import BodyButton from "../../../../ui/BodyButton";
 import TableDataObject from "../../../../models/TableDataObject";
 import { columns } from "../../../../config/table_config";
 import useWindowDimensions from "../../../../hooks/use-window-dimensions";
@@ -156,7 +156,7 @@ const TableViewer = () => {
                                                 }`}
                                             >
                                                 {
-                                                    <DirectoryButton
+                                                    <BodyButton
                                                         onClick={() =>
                                                             setCurrentBigImage(
                                                                 cell.row
@@ -169,7 +169,7 @@ const TableViewer = () => {
                                                         }
                                                     >
                                                         View
-                                                    </DirectoryButton>
+                                                    </BodyButton>
                                                 }
                                             </td>
                                         );

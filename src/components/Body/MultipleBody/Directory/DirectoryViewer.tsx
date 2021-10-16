@@ -18,9 +18,9 @@ import CheckboxTree, { OnCheckNode } from "react-checkbox-tree";
 import "react-checkbox-tree/lib/react-checkbox-tree.css";
 import { useSelector } from "react-redux";
 
-import { resultInterface } from "../../../models/Directory";
+import { resultInterface } from "../../../../models/Directory";
 
-import RootState from "../../../models/RootState";
+import RootState from "../../../../models/RootState";
 
 const removeEmptyArrays = (data: resultInterface[]) => {
     for (const tree of data) {

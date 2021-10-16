@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select";
-import DirectoryButton from "../../../../ui/DirectoryButton";
+import BodyButton from "../../../../ui/BodyButton";
 const selectOptions = [
     { value: "focalLength", label: "Focal Length" },
     { value: "aperture", label: "Aperture" },
@@ -40,9 +40,9 @@ const ChartPicker: React.FC<{
     return (
         <>
             {shownGraph !== "" && (
-                <DirectoryButton onClick={saveChartAsImage} extraClasses="mx-2">
+                <BodyButton onClick={saveChartAsImage} extraClasses="mx-2">
                     Export
-                </DirectoryButton>
+                </BodyButton>
             )}
             <Select onChange={selectChartHandler} options={selectOptions} />
         </>

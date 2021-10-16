@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { modalActions } from "../../store/modal-slice";
-import DirectoryButton from "../../ui/DirectoryButton";
+import BodyButton from "../../ui/BodyButton";
 
 const ModalWrapper: React.FC<{
     src: string;
@@ -54,27 +54,27 @@ const ModalWrapper: React.FC<{
                         top: "1%",
                     }}
                 >
-                    <DirectoryButton
+                    <BodyButton
                         extraClasses="mx-2"
                         onClick={() => changeCurrentBigImage(false)}
                     >
                         {" "}
                         Previous{" "}
-                    </DirectoryButton>
-                    <DirectoryButton
+                    </BodyButton>
+                    <BodyButton
                         extraClasses="mx-2"
                         onClick={viewInNewTab}
                     >
                         {" "}
                         Expand{" "}
-                    </DirectoryButton>
-                    <DirectoryButton
+                    </BodyButton>
+                    <BodyButton
                         extraClasses="mx-2"
                         onClick={() => changeCurrentBigImage(true)}
                     >
                         {" "}
                         Next{" "}
-                    </DirectoryButton>
+                    </BodyButton>
                 </div>
                 
                     <img
