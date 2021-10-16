@@ -10,6 +10,9 @@ import firstLoad from "./config/first_load";
 import useImage from "./hooks/use-image";
 import MultipleBody from "./components/Body/MultipleBody/Body";
 import SingleBody from "./components/Body/SingleBody/Body";
+
+import { isBrowser } from "react-device-detect";
+import { NavLink } from "react-router-dom";
 function App() {
     useEffect(firstLoad, [firstLoad]);
 
@@ -24,7 +27,16 @@ function App() {
                 <Switch>
                     <Route path="/" exact>
                         <Suspense fallback={<div> Loading... </div>}>
-                            <MultipleBody />
+                            {isBrowser && <MultipleBody />}
+                            {!isBrowser && (
+                                <>
+                                    <h1 className="text-xl">                                        
+                                        Sorry, your mobile device does not
+                                        support directory analysis.                                        
+                                    </h1>
+                                    <p className="mt-3"> You may open this web app on a desktop, or use the <span className="text-blue-500 underline"><NavLink to="/single">single image analyzer</NavLink></span>.</p>
+                                </>
+                            )}
                         </Suspense>
                     </Route>
                     <Route path="/single" exact>

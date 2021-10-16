@@ -18,12 +18,13 @@ const DirectoryPicker = () => {
 
     const [currentScannedFile, setCurrentScannedFile] = useState("");
     useEffect(() => {
-        dispatch(
-            statusActions.setStatus({
-                text: `Found: ${currentScannedFile}`,
-                percent: 1,
-            })
-        );
+        if (currentScannedFile)
+            dispatch(
+                statusActions.setStatus({
+                    text: `Found: ${currentScannedFile}`,
+                    percent: 1,
+                })
+            );
     }, [currentScannedFile, dispatch]);
     const showDirectoriesHandler = async () => {
         try {
