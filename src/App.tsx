@@ -32,7 +32,7 @@ function App() {
                                 <>
                                     <h1 className="text-xl">
                                         Sorry, your mobile device does not
-                                        support directory analysis.
+                                        support folder analysis.
                                     </h1>
                                     <p className="mt-3">
                                         You may open this web app on a desktop,
