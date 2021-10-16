@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select";
-import DirectoryButton from "../../../ui/DirectoryButton";
+import DirectoryButton from "../../../../ui/DirectoryButton";
 const selectOptions = [
     { value: "focalLength", label: "Focal Length" },
     { value: "aperture", label: "Aperture" },

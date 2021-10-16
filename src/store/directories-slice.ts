@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import DirectoryStructure, {
     resultInterface,
-} from "../components/models/Directory";
+} from "../models/Directory";
 
 const initialState: DirectoryStructure = {
     rootFolder: [],

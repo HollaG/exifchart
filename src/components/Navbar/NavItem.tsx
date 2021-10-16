@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-
+import { NavLink } from 'react-router-dom'
 const NavItem: FC<{ isHeader: boolean; to: string }> = (props) => {
     return (
         <li
@@ -7,9 +7,9 @@ const NavItem: FC<{ isHeader: boolean; to: string }> = (props) => {
                 props.isHeader ? "text-2xl" : "text-lg"
             }`}
         >
-            <a href={props.to} className="hover:bg-gray-700 p-3 rounded-lg">
+            <NavLink to={props.to} className="hover:bg-gray-700 p-3 rounded-lg">
                 {props.children}
-            </a>
+            </NavLink>
         </li>
     );
 };

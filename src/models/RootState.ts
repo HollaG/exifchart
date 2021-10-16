@@ -1,4 +1,4 @@
-import { ModalStructure } from "../../store/modal-slice";
+import { ModalStructure } from "../store/modal-slice";
 import ChartData from "./ChartData";
 import DirectoryStructure from "./Directory";
 import FilesStructure from "./Files";

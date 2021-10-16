@@ -1,14 +1,14 @@
 import  { useMemo } from "react";
 import { useSelector } from "react-redux";
-import RootState from "../../models/RootState";
+import RootState from "../../../../models/RootState";
 import { usePagination, useSortBy, useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import DirectoryButton from "../../../ui/DirectoryButton";
-import TableDataObject from "../../models/TableDataObject";
-import { columns } from "../../../config/table_config";
-import useWindowDimensions from "../../../hooks/use-window-dimensions";
-import useImage from "../../../hooks/use-image";
+import DirectoryButton from "../../../../../ui/DirectoryButton";
+import TableDataObject from "../../../../models/TableDataObject";
+import { columns } from "../../../../config/table_config";
+import useWindowDimensions from "../../../../hooks/use-window-dimensions";
+import useImage from "../../../../hooks/use-image";
 
 const TableViewer = () => {
     const { height } = useWindowDimensions();

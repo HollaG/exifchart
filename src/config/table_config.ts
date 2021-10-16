@@ -1,5 +1,5 @@
 import { Column } from "react-table";
-import TableDataObject from "../components/models/TableDataObject";
+import TableDataObject from "../models/TableDataObject";
 
 export const columns: Column<TableDataObject>[] = [
     {

@@ -5,9 +5,9 @@ import ChartViewer from "./ChartViewer";
 
 import { saveAs } from "file-saver";
 import { ChartItem } from "chart.js";
-import Container from "../../../ui/Container";
-import ContainerHeader from "../../../ui/ContainerHeader";
-import ContainerContents from "../../../ui/ContainerContents";
+import Container from "../../../../ui/Container";
+import ContainerHeader from "../../../../ui/ContainerHeader";
+import ContainerContents from "../../../../ui/ContainerContents";
 
 const ChartWrapper = () => {
     const [shownGraph, setShownGraph] = useState("");

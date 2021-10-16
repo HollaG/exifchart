@@ -3,10 +3,10 @@ import { useDispatch } from "react-redux";
 import { filesActions } from "../../../store/files-slice";
 import exifr from "exifr";
 import { directoriesActions } from "../../../store/directories-slice";
-import DirectoryButton from "../../../ui/DirectoryButton";
+import DirectoryButton from "../../../../ui/DirectoryButton";
 import { setMany } from "idb-keyval";
 import { statusActions } from "../../../store/status-slice";
-import ImageDetails from "../../models/ImageDetails";
+import ImageDetails from "../../../models/ImageDetails";
 import { directoryOpen } from "browser-fs-access/dist";
 import { useEffect, useState } from "react";
 

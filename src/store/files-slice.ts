@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import ImageDetails from "../components/models/ImageDetails";
-import TableDataObject from "../components/models/TableDataObject";
+import ImageDetails from "../models/ImageDetails";
+import TableDataObject from "../models/TableDataObject";
 import formatShutter from "../functions/formatShutter";
 
 const initialState: {

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import RootState from "../components/models/RootState";
+import RootState from "../models/RootState";
 import { get } from "idb-keyval";
 import { modalActions } from "../store/modal-slice";
 

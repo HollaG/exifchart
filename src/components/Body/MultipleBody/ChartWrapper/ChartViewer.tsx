@@ -1,9 +1,9 @@
 import React from "react";
 
 import { useSelector } from "react-redux";
-import RootState from "../../models/RootState";
+import RootState from "../../../../models/RootState";
 
-import { chartOptions } from "../../../config/chart_config";
+import { chartOptions } from "../../../../config/chart_config";
 import { Bar, Chart } from "react-chartjs-2";
 
 import zoomPlugin from "chartjs-plugin-zoom";

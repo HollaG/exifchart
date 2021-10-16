@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import Status from "../components/models/Status";
+import Status from "../models/Status";
 
 const initialState: Status = {
     scanning: false,
