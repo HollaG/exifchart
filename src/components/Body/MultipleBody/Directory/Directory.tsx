@@ -150,7 +150,7 @@ const Directory = () => {
     return (
         <Container width="xl:w-96">
             <ContainerHeader>
-                <h1 className="flex-grow text-xl px-3">Directory picker</h1>
+                <h1 className="flex-grow text-xl px-3">Folder picker</h1>
                 <div className="">
                     <DirectoryPicker />
                 </div>

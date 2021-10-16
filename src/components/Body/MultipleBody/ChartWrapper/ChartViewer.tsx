@@ -32,7 +32,7 @@ const ChartViewer = React.forwardRef<
         <>
             {shownGraph === "" ? (
                 <p>
-                    Select some directories to get started, then select the
+                    Select a folder to get started, then select the
                     camera metric you wish to analyze in the top right corner.
                 </p>
             ) : (

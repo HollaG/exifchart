@@ -202,7 +202,7 @@ const DirectoryPicker = () => {
         <div className="button-wrapper">
             <div className="mx-1 inline">
                 <BodyButton onClick={showDirectoriesHandler}>
-                    Select directories
+                    Select folder
                 </BodyButton>
             </div>
         </div>
