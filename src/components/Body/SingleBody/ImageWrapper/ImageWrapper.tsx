@@ -23,13 +23,14 @@ const ImageWrapper: React.FC<{ onImageSelected: () => void; image: string }> =
                 </ContainerHeader>
                 <ContainerContents padding={false}>
                     {!image && <p className="p-4"> Select an image to get started. </p>}
-                    <div className="flex justify-center items-center">
+                    {image && <div className="flex justify-center items-center">
                         <img
                             src={image}
                             className="cursor-pointer object-contain"
                             onClick={viewInNewTab}
+                            alt="Preview for user selection"
                         />
-                    </div>
+                    </div>}
                 </ContainerContents>
             </Container>
         );

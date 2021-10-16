@@ -8,24 +8,31 @@ import { setMany } from "idb-keyval";
 import { statusActions } from "../../../../store/status-slice";
 import ImageDetails from "../../../../models/ImageDetails";
 import { directoryOpen } from "browser-fs-access/dist";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import calculate35mmFocalLength from "../../../../functions/calculate35mmFocalLength";
 
-
-
+let times = 0
+let interval: ReturnType<typeof setInterval>;
 const DirectoryPicker = () => {
     const dispatch = useDispatch();
 
     const [currentScannedFile, setCurrentScannedFile] = useState("");
-    useEffect(() => {
-        if (currentScannedFile)
+
+    if (currentScannedFile && !interval) {
+        interval = setInterval(() => {
             dispatch(
                 statusActions.setStatus({
-                    text: `Found: ${currentScannedFile}`,
+                    text: `Scanning${'.'.repeat(times % 3 + 1)}`,
                     percent: 1,
                 })
             );
-    }, [currentScannedFile, dispatch]);
+            times++
+            
+        }, 500)
+        
+
+    }
+
     const showDirectoriesHandler = async () => {
         try {
             const getFallbackFiles = async (
@@ -123,6 +130,7 @@ const DirectoryPicker = () => {
                 },
                 setCurrentScannedFile
             );
+            if (interval) clearInterval(interval)
             const totalFiles = blobsInDirectory.length;
             dispatch(
                 statusActions.setStatus({
