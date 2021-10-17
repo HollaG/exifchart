@@ -3,8 +3,8 @@ import ContainerHeader from "../../../../ui/ContainerHeader";
 import BodyButton from "../../../../ui/BodyButton";
 import ContainerContents from "../../../../ui/ContainerContents";
 
-const ImageWrapper: React.FC<{ onImageSelected: () => void; image: string }> =
-    ({ onImageSelected, image }) => {
+const ImageWrapper: React.FC<{ onImageSelected: () => void; image: string; error: string }> =
+    ({ onImageSelected, image, error }) => {
         const viewInNewTab = () => {
             const newWindow = window.open(
                 image,
@@ -22,8 +22,8 @@ const ImageWrapper: React.FC<{ onImageSelected: () => void; image: string }> =
                     </BodyButton>
                 </ContainerHeader>
                 <ContainerContents padding={false}>
-                    {!image && <p className="p-4"> Select an image to get started. </p>}
-                    {image && <div className="flex justify-center items-center">
+                    {!image && !error && <p className="p-4"> Select an image to get started. </p>}
+                    {image && !error && <div className="flex justify-center items-center">
                         <img
                             src={image}
                             className="cursor-pointer object-contain"
@@ -31,6 +31,7 @@ const ImageWrapper: React.FC<{ onImageSelected: () => void; image: string }> =
                             alt="Preview for user selection"
                         />
                     </div>}
+                    {error && <p className="p-4">{error}</p>}
                 </ContainerContents>
             </Container>
         );

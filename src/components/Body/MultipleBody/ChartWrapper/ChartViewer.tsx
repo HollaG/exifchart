@@ -31,10 +31,13 @@ const ChartViewer = React.forwardRef<
     return (
         <>
             {shownGraph === "" ? (
-                <p>
-                    Select a folder to get started, then select the
-                    camera metric you wish to analyze in the top right corner.
-                </p>
+                <>
+                    <p>
+                        Select a folder to get started, then select the camera
+                        metric you wish to analyze in the top right corner.
+                    </p>
+                    <p>Only .jpg files are analyzed.</p>
+                </>
             ) : (
                 <div className="chart-container" style={{ height: "85vh" }}>
                     <div className="min-size-wrapper-chart h-full">
@@ -70,9 +73,7 @@ const ChartViewer = React.forwardRef<
                 </div>
             )}
         </>
-    )
-    
-   
+    );
 });
 
 export default ChartViewer;

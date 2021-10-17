@@ -2,7 +2,6 @@ import { Suspense, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Route, Switch, useHistory } from "react-router";
 
-// import Header from "./components/Header/Header";
 import ModalWrapper from "./components/Modal/ModalWrapper";
 import RootState from "./models/RootState";
 import Navbar from "./components/Navbar/Navbar";
@@ -12,8 +11,6 @@ import MultipleBody from "./components/Body/MultipleBody/Body";
 import SingleBody from "./components/Body/SingleBody/Body";
 
 import { isBrowser, isMobileSafari } from "react-device-detect";
-import { NavLink } from "react-router-dom";
-import NavItem from "./components/Navbar/NavItem";
 import BodyButton from "./ui/BodyButton";
 function App() {
     useEffect(firstLoad, [firstLoad]);

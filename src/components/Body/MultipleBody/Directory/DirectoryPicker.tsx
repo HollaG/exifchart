@@ -11,7 +11,7 @@ import { directoryOpen } from "browser-fs-access/dist";
 import { useState } from "react";
 import calculate35mmFocalLength from "../../../../functions/calculate35mmFocalLength";
 
-let times = 0
+let times = 0;
 let interval: ReturnType<typeof setInterval>;
 const DirectoryPicker = () => {
     const dispatch = useDispatch();
@@ -22,15 +22,12 @@ const DirectoryPicker = () => {
         interval = setInterval(() => {
             dispatch(
                 statusActions.setStatus({
-                    text: `Scanning${'.'.repeat(times % 3 + 1)}`,
+                    text: `Scanning${".".repeat((times % 3) + 1)}`,
                     percent: 1,
                 })
             );
-            times++
-            
-        }, 500)
-        
-
+            times++;
+        }, 500);
     }
 
     const showDirectoriesHandler = async () => {
@@ -68,10 +65,16 @@ const DirectoryPicker = () => {
                             file,
                             CONSTANTS.EXIF_TAGS
                         );
-
+                        if (!fileData) continue;
                         // Push the item into the Redux store
                         pathArr.pop(); // Remove the file name from the path array
                         let filePath = pathArr.join("/"); // this is the directory path to the file
+
+                        let ss = fileData.ExposureTime;
+                        if (ss === 0) {
+                        } else {
+                            ss = Math.round(10 / ss) / 10;
+                        }
 
                         filesToAdd[fullPathToFile] = {
                             name: file.name,
@@ -79,8 +82,7 @@ const DirectoryPicker = () => {
                             aperture: fileData.FNumber,
                             focalLength: calculate35mmFocalLength(fileData),
                             iso: fileData.ISO,
-                            shutterSpeed:
-                                Math.round(10 / fileData.ExposureTime) / 10,
+                            shutterSpeed: ss,
                             exposureCompensation: fileData.ExposureCompensation,
                             exposureMode: fileData.ExposureProgram,
                             lensModel: fileData.LensModel,
@@ -130,7 +132,7 @@ const DirectoryPicker = () => {
                 },
                 setCurrentScannedFile
             );
-            if (interval) clearInterval(interval)
+            if (interval) clearInterval(interval);
             const totalFiles = blobsInDirectory.length;
             dispatch(
                 statusActions.setStatus({
