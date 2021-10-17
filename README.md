@@ -20,24 +20,28 @@ Upload the `build` folder to a hosting service of your choice.
 
 ## Libaries used
 React
-- [react-router-dom]
-- [react-select]
-- [react-table]
-- [react-checkbox-tree]
-- [react-device-detect]
-- [react-redux]
+- [react-router-dom](https://github.com/remix-run/react-router)
+- [react-select](https://github.com/JedWatson/react-select/tree/master/packages/react-select)
+- [react-table](https://github.com/tannerlinsley/react-table)
+- [react-checkbox-tree](https://github.com/jakezatecky/react-checkbox-tree)
+- [react-device-detect](https://github.com/duskload/react-device-detect)
+- [react-redux](https://github.com/reduxjs/react-redux)
 
 Parsing EXIF
-- [exifr]
+- [exifr](https://github.com/MikeKovarik/exifr)
 
 Chart
-- [react-chartjs-2]
-- [chartjs-plugin-zoom]
+- [react-chartjs-2](https://github.com/reactchartjs/react-chartjs-2)
+- [chartjs-plugin-zoom](https://github.com/chartjs/chartjs-plugin-zoom)
 
 Others
-- [idb-keyval]
-- [file-saver]
-- [fortawesome]
+- [idb-keyval](https://github.com/jakearchibald/idb-keyval)
+- [file-saver](https://github.com/eligrey/FileSaver.js)
+- [react-fontawesome](https://github.com/FortAwesome/react-fontawesome)
 
 ## Contributing
 Pull requests are welcome!
+
+## Author's note
+I developed this as a way to get my feet wet in React. I know there is a lot of optimization to be done, but I had fun building this! Hope it at least helps some people out!
+
