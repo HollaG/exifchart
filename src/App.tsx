@@ -12,6 +12,7 @@ import SingleBody from "./components/Body/SingleBody/Body";
 
 import { isBrowser, isMobileSafari } from "react-device-detect";
 import BodyButton from "./ui/BodyButton";
+import Footer from "./components/Footer/Footer";
 function App() {
     useEffect(firstLoad, [firstLoad]);
 
@@ -20,9 +21,9 @@ function App() {
     const { changeCurrentBigImage } = useImage();
     const history = useHistory();
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="px-2 w-screen md:w-9/12 mx-auto my-8">
+            <main className="px-2 w-screen md:w-9/12 mx-auto my-8 flex-grow">
                 <Switch>
                     <Route path="/" exact>
                         <Suspense fallback={<div> Loading... </div>}>
@@ -70,6 +71,7 @@ function App() {
                     </Route>
                 </Switch>
             </main>
+            <Footer/>
             {modal.showing && (
                 <ModalWrapper
                     src={modal.src}
@@ -79,7 +81,7 @@ function App() {
                     changeCurrentBigImage={changeCurrentBigImage}
                 />
             )}
-        </>
+        </div>
     );
 }
 
