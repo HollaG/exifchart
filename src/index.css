@@ -11,7 +11,7 @@ span.rct-collapse {
 
 /* This style is to prevent scrollbar from repositioning elements on the page. */
 html { 
-    /* overflow-y: scroll; */
+    overflow-y: scroll;
 }
 
 /* This style is to ensure that the directory (section.directory-section) is the same height as the chart, when the size of the viewport is greater than xl (1280px). */
