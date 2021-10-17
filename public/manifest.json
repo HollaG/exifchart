@@ -1,6 +1,6 @@
 {
     "short_name": "EXIFChart",
-    "name": "EXIFChart - Read and analyze EXIF of images in folders or files",
+    "name": "EXIFChart - Analyze your shooting styles; interactive charts for most-used focal lengths, apertures, and more!",
     "icons": [
         {
             "src": "icons/manifest-icon-192.maskable.png",
