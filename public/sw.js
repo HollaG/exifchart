@@ -29,12 +29,31 @@ self.addEventListener("install", function (event) {
 });
 
 self.addEventListener("fetch", function (event) {
+    if (!(event.request.url.match(/http/i))) return
     event.respondWith(
-        caches.match(event.request).then(function (response) {
-            if (response) {
-                return response;
-            }
-            return fetch(event.request);
+        caches.match(event.request).then((cacheRes) => {
+            return (
+                cacheRes ||
+                fetch(event.request).then((fetchRes) => {
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request.url, fetchRes.clone());
+                        return fetchRes;
+                    });
+                })
+            );
+        })
+    );
+});
+
+self.addEventListener("activate", (event) => {
+    // Delete old versions of the cache
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys
+                    .filter((key) => key !== CACHE_NAME)
+                    .map((key) => caches.delete(key))
+            );
         })
     );
 });
