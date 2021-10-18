@@ -7,6 +7,7 @@ import DirectoryStructure, {
 const initialState: DirectoryStructure = {
     rootFolder: [],
     folderList: [],
+    checked: [],
     mapFolderOrFileIdToImage: {},
     constructing: false,
 };
@@ -38,6 +39,7 @@ const directoriesSlice = createSlice({
             // Thanks!
             let result: resultInterface[] = [];
             let level = { result };
+            let toCheckIDs: string[] = []
 
             // How many items were previously already added in 'folderList'? We skip these items so that we do not double-count stuff
             // A new import should be appended to the end of the structure, and should not include any items which were already in the structure.
@@ -59,14 +61,19 @@ const directoriesSlice = createSlice({
                         });
                         // Impossible to determine if there are children, hence we will add it for BOTH files and folders
                         state.mapFolderOrFileIdToImage[id] = i
+
+                        toCheckIDs.push(id)
                     }
                     return r[name];
                 }, level);
             }
             state.rootFolder.push(...result);
             state.constructing = false;
-
+            state.checked.push(...toCheckIDs)
         },
+        setChecked(state, action:PayloadAction<string[]>) {
+            state.checked = action.payload
+        }
     },
 });
 
