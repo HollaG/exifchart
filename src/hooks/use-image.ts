@@ -69,15 +69,6 @@ const useImage = () => {
             if (imageDetails.iso) desc.push(`ISO ${imageDetails.iso}`);
             else desc.push("Unknown ISO");
 
-            console.log("Success", {
-                path: pathArg,
-                index: indexArg,
-                src: imageSrc,
-                desc: desc.join(" | "),
-                showing: true,
-                title: header.join(" "),
-            });
-
             dispatch(
                 modalActions.setModalProps({
                     path: pathArg,

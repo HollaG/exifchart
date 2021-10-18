@@ -87,7 +87,6 @@ const modalSlice = createSlice({
             state.index = action.payload.index
         },
         setModalProps(state, action:PayloadAction<ModalStructure>) {
-            console.log(action.payload)
             state.src = action.payload.src
             state.title = action.payload.title
             state.desc = action.payload.desc

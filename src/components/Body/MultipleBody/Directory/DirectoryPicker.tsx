@@ -102,7 +102,7 @@ const DirectoryPicker = () => {
                             statusActions.setStatus({
                                 text: `Scanned: ${
                                     file.name
-                                } (${i}/${totalFiles})<br/>Directory: ${
+                                } (${i}/${totalFiles})<br/>Folder: ${
                                     filePath ? filePath : "/"
                                 }`,
                                 percent: curPercent,
