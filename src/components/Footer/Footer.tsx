@@ -8,6 +8,7 @@ const Footer = () => {
                     href="https://github.com/HollaG/exifchart"
                     target="_blank"
                     className="underline hover:text-gray-800"
+                    rel="noopener noreferrer"
                 >
                     Github
                 </a>

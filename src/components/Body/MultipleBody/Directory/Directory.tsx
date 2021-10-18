@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import RootState from "../../../../models/RootState";
 import DirectoryPicker from "./DirectoryPicker";
@@ -15,15 +15,13 @@ import { filesActions } from "../../../../store/files-slice";
 import useImage from "../../../../hooks/use-image";
 
 const Directory = () => {
-    const checked = useSelector((state:RootState) => state.directories.checked)
+    const checked = useSelector(
+        (state: RootState) => state.directories.checked
+    );
     const [expanded, setExpanded] = useState<string[]>([]);
-    const [allowChartReRender, setAllowChartReRender] = useState(false);
 
     const dispatch = useDispatch();
 
-    const mapOfFolderOrFileIdToImage = useSelector(
-        (state: RootState) => state.directories.mapFolderOrFileIdToImage
-    );
     const folderList = useSelector(
         (state: RootState) => state.directories.folderList
     );
@@ -37,44 +35,33 @@ const Directory = () => {
 
         // For each checked item, reach out to "mapFolderOrFileIdToImage" in the Directories slice
         for (const checkedItemId of checked) {
-            if (
-                mapOfFolderOrFileIdToImage[checkedItemId] ||
-                mapOfFolderOrFileIdToImage[checkedItemId] === 0
-            ) {
-                // The index could be zero. accessing obj[key] = 0 will fail because 0 is falsy
+            let index = Number(checkedItemId);
+            if (folderList[index]) {
+                // This is the path to the file, which should be a KEY in the Files/files object slice.
+                let filePath = folderList[index];
+                if (imageMap[filePath]) {
+                    // Congratulations, we've found the image for this checked ID!
+                    // console.log("Found image")
+                    let imageData = imageMap[filePath];
+                    imageDataArray.push(imageData);
 
-                // This item exists (should always exist, just a safety check)
+                    let formattedShutter = "";
 
-                // mapOfFolderOrFileIdToImage[checkedItemId] --> returns array index of file or folder in the Directories/folderList slice.
-                // Reach out to the folderList to find the path to the image
-                let index = mapOfFolderOrFileIdToImage[checkedItemId];
-                if (folderList[index]) {
-                    // This is the path to the file, which should be a KEY in the Files/files object slice.
-                    let filePath = folderList[index];
-                    if (imageMap[filePath]) {
-                        // Congratulations, we've found the image for this checked ID!
-                        // console.log("Found image")
-                        let imageData = imageMap[filePath];
-                        imageDataArray.push(imageData);
-
-                        let formattedShutter = "";
-
-                        let ss = imageData.shutterSpeed;
-                        if (Number(ss) < 1) {
-                            formattedShutter = `${
-                                Math.round(10 / Number(ss)) / 10
-                            }"`;
-                        } else if (Number(ss) === 1) {
-                            formattedShutter = "1";
-                        } else formattedShutter = `1/${Math.round(Number(ss))}`;
-                        tableDataArray.push({
-                            ...imageData,
-                            id: index,
-                            path: filePath,
-                            image: "Load",
-                            shutterSpeed: formattedShutter,
-                        });
-                    }
+                    let ss = imageData.shutterSpeed;
+                    if (Number(ss) < 1) {
+                        formattedShutter = `${
+                            Math.round(10 / Number(ss)) / 10
+                        }"`;
+                    } else if (Number(ss) === 1) {
+                        formattedShutter = "1";
+                    } else formattedShutter = `1/${Math.round(Number(ss))}`;
+                    tableDataArray.push({
+                        ...imageData,
+                        id: index,
+                        path: filePath,
+                        image: "Load",
+                        shutterSpeed: formattedShutter,
+                    });
                 }
             }
         }
@@ -88,8 +75,6 @@ const Directory = () => {
         dispatch,
         folderList,
         imageMap,
-        mapOfFolderOrFileIdToImage,
-        allowChartReRender,
     ]);
 
     useEffect(chartDataHandler, [checked, chartDataHandler]);
@@ -102,7 +87,7 @@ const Directory = () => {
 
     const onImageSelected = async (targetNodeId: string) => {
         // Goal: Get the filePath as it is a key in IndexedDB whose value is the FileHandle
-        let folderPathIndex = mapOfFolderOrFileIdToImage[targetNodeId];
+        let folderPathIndex = Number(targetNodeId)
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
             if (!filePath) return console.log("Missing file path!");
@@ -125,9 +110,7 @@ const Directory = () => {
 
     const { setCurrentBigImage } = useImage();
 
-    const scanningStatus = useSelector(
-        (state: RootState) => state.status
-    );
+    const scanningStatus = useSelector((state: RootState) => state.status);
 
     const width = `calc(${scanningStatus.percent}% - 8px)`;
 

@@ -4,7 +4,6 @@ import Status from "../models/Status";
 const initialState: Status = {
     scanning: false,
     text: "",
-    nextAction: "",
     percent: 0
 };
 

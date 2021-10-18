@@ -154,7 +154,7 @@ const DirectoryPicker = () => {
             );
 
             // Update the states with the new values (directoriesToAdd, filesToAdd)
-            dispatch(directoriesActions.setDirectories(directoriesToAdd));
+            dispatch(directoriesActions.constructTree(directoriesToAdd));
             dispatch(filesActions.setFiles(filesToAdd));
             dispatch(
                 statusActions.setStatus({
@@ -171,7 +171,7 @@ const DirectoryPicker = () => {
                 })
             );
 
-            dispatch(directoriesActions.constructTree());
+
 
             let timeTaken =
                 Math.round(((performance.now() - timeStart) / 1000) * 100) /
