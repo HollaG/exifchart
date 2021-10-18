@@ -3,6 +3,7 @@ export default interface ImageDetails {
     path: string,
     aperture: number,
     focalLength: number,
+    focalLength35: number,
     iso: number,
     shutterSpeed: number|string,
     exposureCompensation: number,    

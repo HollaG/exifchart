@@ -3,6 +3,7 @@ import Select from "react-select";
 import BodyButton from "../../../../ui/BodyButton";
 const selectOptions = [
     { value: "focalLength", label: "Focal Length" },
+    { value: "focalLength35", label: "Focal Length (35mm equiv)" },
     { value: "aperture", label: "Aperture" },
     { value: "iso", label: "ISO" },
     { value: "shutterSpeed", label: "Shutter Speed" },
@@ -15,26 +16,7 @@ const ChartPicker: React.FC<{
     const selectChartHandler = (
         option: { value: string; label: string } | null
     ) => {
-        switch (option?.value) {
-            case "focalLength":
-                setShownGraph(option?.value);
-
-                break;
-            case "aperture":
-                setShownGraph(option?.value);
-
-                break;
-            case "iso":
-                setShownGraph(option?.value);
-
-                break;
-            case "shutterSpeed":
-                setShownGraph(option?.value);
-
-                break;
-            default:
-                console.log("Value wasn't an option");
-        }
+        if (option) setShownGraph(option.value)
     };
 
     return (
