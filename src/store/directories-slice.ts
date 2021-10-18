@@ -12,9 +12,6 @@ const initialState: DirectoryStructure = {
     constructing: false,
 };
 
-const uid = function () {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-};
 const directoriesSlice = createSlice({
     name: "directories",
     initialState,
@@ -52,7 +49,7 @@ const directoriesSlice = createSlice({
                     if (!r[name]) {
                         r[name] = { result: [] };
 
-                        let id = uid();
+                        let id = `id-${i}`
 
                         r.result.push({
                             value: id,
