@@ -3,6 +3,7 @@ export default interface DirectoryStructure {
     folderList: string[];
     mapFolderOrFileIdToImage: { [key: string]: number };
     constructing: boolean;
+    checked: string[]
 }
 export interface resultInterface {
     value: string;

@@ -16,11 +16,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef } from "react";
 import CheckboxTree, { OnCheckNode } from "react-checkbox-tree";
 import "react-checkbox-tree/lib/react-checkbox-tree.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { resultInterface } from "../../../../models/Directory";
 
 import RootState from "../../../../models/RootState";
+import { directoriesActions } from "../../../../store/directories-slice";
 
 const removeEmptyArrays = (data: resultInterface[]) => {
     for (const tree of data) {
@@ -35,16 +36,12 @@ const removeEmptyArrays = (data: resultInterface[]) => {
 };
 
 interface DirectoryViewerProps {
-    checked: string[];
-    setChecked: React.Dispatch<React.SetStateAction<string[]>>;
     expanded: string[];
     setExpanded: React.Dispatch<React.SetStateAction<string[]>>;
     onImageSelected: (targetNodeId:string) => void
 }
 
 const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
-    checked,
-    setChecked,
     expanded,
     setExpanded,
     onImageSelected
@@ -69,10 +66,9 @@ const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
         }
     }, [directories, setExpanded]);
 
+    const dispatch = useDispatch()
     const checkHandler = (checked: string[], targetNode: OnCheckNode) => {
-        setChecked(checked);
-
-        
+        dispatch(directoriesActions.setChecked(checked))
     };
 
     const expandHandler = (expanded: string[]) => {
@@ -82,6 +78,8 @@ const DirectoryViewer: React.FC<DirectoryViewerProps> = ({
     const clickHandler = (targetNode: OnCheckNode) => {
         onImageSelected(targetNode.value)
     };
+
+    const checked = useSelector((state: RootState) => state.directories.checked)
     return (
         <CheckboxTree
             ref={tree}

@@ -15,7 +15,7 @@ import { filesActions } from "../../../../store/files-slice";
 import useImage from "../../../../hooks/use-image";
 
 const Directory = () => {
-    const [checked, setChecked] = useState<string[]>([]);
+    const checked = useSelector((state:RootState) => state.directories.checked)
     const [expanded, setExpanded] = useState<string[]>([]);
     const [allowChartReRender, setAllowChartReRender] = useState(false);
 
@@ -29,13 +29,8 @@ const Directory = () => {
     );
     const imageMap = useSelector((state: RootState) => state.files.files);
 
-    // allowChartReRenders = false // re-set to zero once component rerenderes due to useSelector changing
-    useEffect(() => {
-        setAllowChartReRender(false);
-    }, [mapOfFolderOrFileIdToImage, folderList, imageMap]);
-
     const chartDataHandler = useCallback(() => {
-        if (!checked.length || !allowChartReRender) return;
+        if (!checked.length) return;
 
         let imageDataArray: ImageDetails[] = [];
         let tableDataArray: TableDataObject[] = [];
@@ -107,13 +102,11 @@ const Directory = () => {
 
     const onImageSelected = async (targetNodeId: string) => {
         // Goal: Get the filePath as it is a key in IndexedDB whose value is the FileHandle
-        console.log(targetNodeId);
         let folderPathIndex = mapOfFolderOrFileIdToImage[targetNodeId];
         if (folderPathIndex || folderPathIndex === 0) {
             let filePath = folderList[folderPathIndex];
             if (!filePath) return console.log("Missing file path!");
             // Try to get the file blob from IndexedDB
-            console.log(filePath);
             let idbFile: string | undefined = await get(filePath);
 
             if (!idbFile)
@@ -136,16 +129,7 @@ const Directory = () => {
         (state: RootState) => state.status
     );
 
-    const setItemCheckedHandler = (
-        checkedArray: React.SetStateAction<string[]>
-    ) => {
-        setChecked(checkedArray);
-        setAllowChartReRender(true); // Only allow the function in useCallback() to run once the user starts
-    };
-
     const width = `calc(${scanningStatus.percent}% - 8px)`;
-
-    
 
     return (
         <Container width="xl:w-96">
@@ -184,8 +168,6 @@ const Directory = () => {
                         </div>
                     )}
                     <DirectoryViewer
-                        checked={checked}
-                        setChecked={setItemCheckedHandler}
                         expanded={expanded}
                         setExpanded={setExpanded}
                         onImageSelected={onImageSelected}
