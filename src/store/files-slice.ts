@@ -1,15 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import FilesStructure from "../models/Files";
 import ImageDetails from "../models/ImageDetails";
 import TableDataObject from "../models/TableDataObject";
-import formatShutter from "../functions/formatShutter";
 
-const initialState: {
-    files: { [key: string]: ImageDetails };
-    selectedIDs: string[];
-    tableData: TableDataObject[];
-} = {
+const initialState: FilesStructure = {
     files: {},
-    selectedIDs: [],
     tableData: [],
 };
 
@@ -33,26 +28,8 @@ const filesSlice = createSlice({
             action: PayloadAction<{ [key: string]: ImageDetails }>
         ) => {
             // console.log("FilesSlice reducer: setFiles");
-            let numberOfItemsAlreadyPresent = state.tableData.length
 
             state.files = { ...state.files, ...action.payload };
-            // state.tableData = [
-            //     ...state.tableData,
-            //     ...Object.keys(action.payload).map((key, index) => {
-            //         let pathToFile = action.payload[key].path
-            //             ? `${action.payload[key].path}/${action.payload[key].name}`
-            //             : action.payload[key].name;
-            //         let ss = action.payload[key].shutterSpeed;
-                    
-            //         return {
-            //             ...action.payload[key],
-            //             id: numberOfItemsAlreadyPresent + index + 1,
-            //             path: pathToFile,
-            //             shutterSpeed: formatShutter(ss),
-            //             image: "Load",
-            //         };
-            //     }),
-            // ];
         },
         setFilteredTableData(state, action: PayloadAction<TableDataObject[]>) {
             state.tableData = action.payload;
