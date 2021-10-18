@@ -23,8 +23,12 @@ export const columns: Column<TableDataObject>[] = [
         accessor: "lensModel" as keyof TableDataObject,
     },
     {
-        Header: "Focal Length (35mm equiv)",
+        Header: "Focal Length",
         accessor: "focalLength" as keyof TableDataObject,
+    },
+    {
+        Header: "Focal Length (35mm equiv)",
+        accessor: "focalLength35" as keyof TableDataObject,
     },
     {
         Header: "Shutter Speed",

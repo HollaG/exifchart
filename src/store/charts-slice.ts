@@ -5,15 +5,18 @@ import formatShutter from "../functions/formatShutter";
 
 const initialState: {
     focalLength: ChartData;
+    focalLength35: ChartData;
     aperture: ChartData;
     shutterSpeed: ChartData;
     iso: ChartData;
     raw: ImageDetails[];
 } = {
     focalLength: {},
+    focalLength35: {},
     aperture: {},
     shutterSpeed: {},
     iso: {},
+    
     raw: [],
 };
 
@@ -101,7 +104,7 @@ const chartsSlice = createSlice({
             // action.payload is an array of all selected images, each image being an Object (interface ImageDetails)
             // console.log("ChartSlice reducer: updateChartData");
             state.raw = action.payload;
-            state.focalLength = {};
+            state.focalLength35 = {};
             state.aperture = {};
             state.shutterSpeed = {};
             state.iso = {};
@@ -137,11 +140,13 @@ const chartsSlice = createSlice({
 
                 */
             const focalLengthsFound: { [key: number]: 1 } = {};
+            const focalLength35sFound: { [key: number]: 1 } = {};
             const aperturesFound: { [key: number]: 1 } = {};
             const shutterSpeedsFound: { [key: number]: 1 } = {};
             const isosFound: { [key: number]: 1 } = {};
 
             const dataSetObjectsFocalLength: DatasetObjectSchema = {};
+            const dataSetObjectsFocalLength35: DatasetObjectSchema = {};
             const dataSetObjectsAperture: DatasetObjectSchema = {};
             const dataSetObjectsShutterSpeed: DatasetObjectSchema = {};
             const dataSetObjectsIso: DatasetObjectSchema = {};
@@ -185,6 +190,45 @@ const chartsSlice = createSlice({
                         } else {
                             // Has already been added, increment number of pictures by 1
                             combination[adjustedFocalLength]++;
+                        }
+                    }
+                }
+
+
+                /* Handling the FOCAL LENGTH (35mm equiv) Chart */
+
+                if (!image.focalLength35) {
+                    console.log(
+                        "This image's focal length was not parsed correctly: ",
+                        image
+                    );
+                } else {
+                    let adjustedFocalLength35 =
+                        ROUNDING_FACTOR *
+                        Math.ceil(image.focalLength35 / ROUNDING_FACTOR);
+                    if (!focalLength35sFound[adjustedFocalLength35])
+                        focalLength35sFound[adjustedFocalLength35] = 1;
+                    else focalLength35sFound[adjustedFocalLength35]++;
+
+                    // Check if this combi has already been added
+                    let combination =
+                        dataSetObjectsFocalLength35[cameraAndLensCombination];
+                    if (!combination) {
+                        // Hasn't been added yet
+                        dataSetObjectsFocalLength35[cameraAndLensCombination] =
+                            {};
+                        dataSetObjectsFocalLength35[cameraAndLensCombination][
+                            adjustedFocalLength35
+                        ] = 1;
+                    } else {
+                        // Combination has already been added
+                        // Check if the focal length has been added
+                        if (!combination[adjustedFocalLength35]) {
+                            // Hasn't been added yet, add it
+                            combination[adjustedFocalLength35] = 1;
+                        } else {
+                            // Has already been added, increment number of pictures by 1
+                            combination[adjustedFocalLength35]++;
                         }
                     }
                 }
@@ -289,7 +333,7 @@ const chartsSlice = createSlice({
                 }
             });
 
-            /* Handling the FOCAL LENGTH Chart */
+            /* Handling the FOCAL LENGTH (35mm equiv) Chart */
 
             const labelsFocalLength: string[] = Object.keys(focalLengthsFound); // Remember, Object.keys returns array of strings even though the keys are numbers
             const datasetsFocalLength: DataSet[] = [];
@@ -345,6 +389,64 @@ const chartsSlice = createSlice({
                 ),
                 // labels: labelsFocalLength.map(focalLength => `${focalLength} mm`),
                 datasets: datasetsFocalLength,
+            };
+
+            /* Handling the FOCAL LENGTH (35mm equiv) Chart */
+
+            const labelsFocalLength35: string[] = Object.keys(focalLength35sFound); // Remember, Object.keys returns array of strings even though the keys are numbers
+            const datasetsFocalLength35: DataSet[] = [];
+
+            const combinationsFocalLength35 = Object.keys(
+                dataSetObjectsFocalLength35
+            );
+            for (let i = 0; i < combinationsFocalLength35.length; i++) {
+                let combination = combinationsFocalLength35[i];
+
+                // combination: Canon EOS M5||100-400 F5-6.3 DG OS HSM | C (for e.g.)
+                // each combination is a new Dataset
+
+                // Data - how to get?
+                // We need to loop through all the labels ( which is focal length ).
+                // IF - focal length is one of the keys in dataSetObjects[combination] - it is a focal length shot by this lens, therefore, add the # (value) to the data.
+                // If it is not, then add zero.
+                // Remember, the dataSetObjects[combination] == { 260: 3, 400: 10, 600: 1 }
+
+                let data: number[] = [];
+                labelsFocalLength35.forEach((focalLength35) => {
+                    let focalLength35Num = Number(focalLength35);
+                    if (
+                        dataSetObjectsFocalLength35[combination][focalLength35Num]
+                    ) {
+                        data.push(
+                            dataSetObjectsFocalLength35[combination][
+                                focalLength35Num
+                            ]
+                        );
+                    } else {
+                        data.push(0);
+                    }
+                });
+
+                let dataset: DataSet = {
+                    label: combination.replace("||", " w/ "),
+                    data,
+                    backgroundColor: hexToRgbA(
+                        rainbow(combinationsFocalLength35.length, i),
+                        "0.4"
+                    ),
+                    borderColor: rainbow(combinationsFocalLength35.length, i),
+                    borderWidth: 2,
+                };
+                datasetsFocalLength35.push(dataset);
+            }
+
+            state.focalLength35 = {
+                labels: labelsFocalLength35.map(
+                    (focalLength35) =>
+                        `${Number(focalLength35) - 9} - ${focalLength35} mm`
+                ),
+                // labels: labelsFocalLength35.map(focalLength35 => `${focalLength35} mm`),
+                datasets: datasetsFocalLength35,
             };
 
             /* Handling the Aperture Chart */

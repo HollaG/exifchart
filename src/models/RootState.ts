@@ -9,6 +9,7 @@ export default interface RootState {
     directories: DirectoryStructure,
     charts: {
         focalLength: ChartData,
+        focalLength35: ChartData,
         aperture: ChartData,
         shutterSpeed: ChartData,
         iso: ChartData
