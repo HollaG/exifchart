@@ -16,7 +16,7 @@ if ("serviceWorker" in navigator) {
     });
 }
 
-let CACHE_NAME = "exifchart-cache-v1.0.1";
+let CACHE_NAME = "exifchart-cache-v1.0.2";
 const urlsToCache = ["/", "/single"];
 self.addEventListener("install", function (event) {
     // Perform install steps
